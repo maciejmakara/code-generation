@@ -1,0 +1,13 @@
+dataset,kind,name,avg_score,count
+all,model,Claude,0.4375,8
+all,model,Gpt,0.5,8
+all,scenario,fork,0.375,4
+all,scenario,loop,0.5,4
+all,scenario,simple,0.25,4
+all,scenario,trycatch,0.75,4
+filtered,model,Claude,0.5,6
+filtered,model,Gpt,0.5833333333333334,6
+filtered,scenario,fork,0.25,2
+filtered,scenario,loop,1.0,2
+filtered,scenario,simple,0.25,4
+filtered,scenario,trycatch,0.75,4

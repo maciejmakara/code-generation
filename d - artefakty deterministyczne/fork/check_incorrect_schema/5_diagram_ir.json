@@ -1,0 +1,625 @@
+{
+  "activity": "Generate monthly statement",
+  "nodes": [
+    {
+      "id": "0mgmxTmGAqAKCQpg",
+      "action": "0mgmxTmGAqAKCQpg",
+      "type": "uml:InitialNode",
+      "semanticType": "uml:InitialNode",
+      "stereotype": null,
+      "comment": "endpoint = POST /accounts/{accountId}/statements\nresponseSuccess = 202 Accepted\nresponseError = 400|401|403|404|409|422",
+      "in": 0,
+      "out": 1
+    },
+    {
+      "id": "H7WOxTmGAqAKCQtu",
+      "action": "AnalyzeFailureReason",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Analyze why previous statement generation failed. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"failureAnalysis\",\"type\":\"FailureAnalysis\",\"target\":\"context\"}] \nexceptions = [\"AnalysisUnavailable\"] \npreCondition = statement_status_failed \npostCondition = failure_root_cause_identified",
+      "in": "1", // Zmiana na String
+      "out": 1
+    },
+    {
+      "id": "1lQmxTmGAqAKCQpo",
+      "action": "AuthenticateRequest",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Security",
+      "comment": "desc = Authenticate customer and validate JWT token. \ninputs = [ \n{\"name\":\"authToken\",\"type\":\"JWT\",\"source\":\"request\"} \n] \noutputs = [ \n{\"name\":\"customerId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \nexceptions = [\"Unauthorized\",\"Forbidden\"] \npreCondition = valid_jwt_format \npostCondition = customer_authenticated",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "irzWxTmGAqAKCQq7",
+      "action": "BuildCompletedResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for existing completed statement. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\":\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "S4rUvzmGAqAAu0zf",
+      "action": "BuildNewResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for newly created job \ninputs = [{\"name\": \"newStatementId\", \"type\": \"UUID\",\"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "Lr5UvzmGAqAAu0yu",
+      "action": "BuildRecoveryResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for recovered job \ninputs = [{\"name\": \"recoveryResult\", \"type\": \"RecoveryResult\", \"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "f.62xTmGAqAKCQsH",
+      "action": "BuildRestartedJobResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for restarted job. \ninputs = [{\"name\":\"restartedJobId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\":\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "n4N2xTmGAqAKCQs0",
+      "action": "BuildRunningResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for still-running job. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\": \n\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "JILCvzmGAqAAu08I",
+      "action": "BuildStatementResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response with download URL \ninputs = [{\"name\": \"statementId\", \"type\": \"UUID\", \"source\": \"context\"},{\"name\": \"downloadUrl\", \"type\": \"String\", \"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "C0uBxTmGAqAKCQ6q",
+      "action": "C0uBxTmGAqAKCQ6q",
+      "type": "uml:ActivityFinalNode",
+      "semanticType": "uml:ActivityFinalNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 0
+    },
+    {
+      "id": "fSw2xTmGAqAKCQrX",
+      "action": "CheckJobProgress",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Check if running job is stalled or needs to be restarted. \ninputs = [ \n{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"jobProgress\",\"type\":\"JobProgress\",\"target\":\"context\"}] \nexceptions = [\"JobNotFound\"] \npreCondition = statement_status_running \npostCondition = job_progress_evaluated",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "pwMexTmGAqAKCQ2P",
+      "action": "ComputeStatementTotals",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Compute totals using preliminary calculations and transaction data. \ninputs = [ {\"name\":\"transactions\",\"type\":\"Transaction[]\",\"source\":\"context\"}, \n{\"name\":\"feeSchedule\",\"type\":\"FeeSchedule\",\"source\":\"context\"}, \n{\"name\":\"preliminaryCalculations\",\"type\":\"CalculationResult[]\",\"source\":\"context\"}] \noutputs = [{\"name\":\"statementTotals\",\"type\":\"StatementTotals\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "R4nOxTmGAqAKCQue",
+      "action": "CreateNewStatementJob",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Create new job for non-retryable failures. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}\n] \noutputs = [{\"name\":\"newStatementId\",\"type\":\"UUID\",\"target\":\"context\"}] \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "8LkuxTmGAqAKCQvW",
+      "action": "CreateStatementJob",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Create statement generation job. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementId\",\"type\":\"UUID\",\"target\":\"context\"}] \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "tXBWxTmGAqAKCQqC",
+      "action": "EvaluateStatementStatus",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Evaluate current statement status to determine processing path. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementStatus\",\"type\":\"StatementStatus\",\"target\":\"context\"}] \nexceptions = [\"Conflict\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "KnpuxTmGAqAKCQ1D",
+      "action": "FetchAccountProfile",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Fetch account holder profile and formatting preferences. \ninputs = [{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ {\"name\":\"accountProfile\",\"type\":\"AccountProfile\",\"target\":\"context\"} ] \nretryPolicy = {\"maxAttempts\":2,\"backoffMs\":400,\"retryOn\":[\"Timeout\",\"502\",\"503\"], \"onRetryExhausted\": \"throw_ProfileServiceUnavailable\"} \nexceptions = [\"ProfileServiceUnavailable\"] \npreCondition = job_created \npostCondition = account_profile_retrieved \nsideEffects = false",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "dfHWxTmGAqAKCQrJ",
+      "action": "FlowJoinGenerateStatement",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 4,
+      "out": 1
+    },
+    {
+      "id": "0gh2xTmGAqAKCQsi",
+      "action": "FlowJoinJobStalled",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "vSfsvzmGAqAAu03s",
+      "action": "FlowJoinProfileResolved",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "oKAuxTmGAqAKCQuq",
+      "action": "FlowJoinRetryableFailure",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "IyduxTmGAqAKCQ1h",
+      "action": "IyduxTmGAqAKCQ1h",
+      "type": "uml:JoinNode",
+      "semanticType": "uml:JoinNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 3,
+      "out": 1
+    },
+    {
+      "id": "e_huxTmGAqAKCQ03",
+      "action": "LoadFeesAndRates",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Cache",
+      "comment": "desc = Load fee schedule and FX rates from cache. \ninputs = [{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}] \noutputs = [ {\"name\":\"feeSchedule\",\"type\":\"FeeSchedule\",\"target\":\"context\"}, \n{\"name\":\"preliminaryCalculations\",\"type\":\"CalculationResult[]\",\"target\":\"context\"} ]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "emLsvzmGAqAAu03D",
+      "action": "LoadFormattingPreferences",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Extract formatting preferences from # account profile \ninputs = [{\"name\": \"accountProfile\", \"type\": \"AccountProfile\",\"source\": \"context\"}]\noutputs = [{\"name\": \"formattingPreferences\",\"type\": \"FormattingPreferences\", \"target\": \"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "r1BuxTmGAqAKCQ0r",
+      "action": "LoadTransactions",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Load transactions for the account and period. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}\n] \noutputs = [{\"name\":\"transactions\",\"type\":\"Transaction[]\",\"target\":\"context\"}] \nexceptions = [\"NotFound\",\"DataCorruption\"] \npreCondition = job_created \npostCondition = transaction_data_loaded",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "81JexTmGAqAKCQ2t",
+      "action": "PublishStatementReady",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Publisher",
+      "comment": "desc = Publish StatementReady domain event \ninputs = [ \n{\"name\":\"statementId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"downloadUrl\",\"type\":\"String\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"eventPublished\",\"type\":\"bool\",\"target\":\"event\"} \n] \nexceptions = [\"EventPublishFailed\"] \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "mnTOxTmGAqAKCQuS",
+      "action": "RecoverFailedJob",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Recover failed job with checkpoint resume. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ \n{\"name\":\"recoveryResult\",\"type\":\"RecoveryResult\",\"target\":\"context\"}, \n{\"name\":\"resumePoint\",\"type\":\"ResumePoint\",\"target\":\"context\"} \n] \npreCondition = retryable_failure_detected \npostCondition = job_recovery_initiated \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "X98exTmGAqAKCQ2Z",
+      "action": "RenderStatementDocument",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Render document with formatting preferences and computed totals. \ninputs = [ \n{\"name\":\"accountProfile\",\"type\":\"AccountProfile\",\"source\":\"context\"}, \n{\"name\":\"formattingPreferences\",\"type\":\"FormattingPreferences\",\"source\":\"context\"}, \n{\"name\":\"transactions\",\"type\":\"Transaction[]\",\"source\":\"context\"}, \n{\"name\":\"statementTotals\",\"type\":\"StatementTotals\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementDocument\",\"type\":\"byte[]\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "FNy2xTmGAqAKCQr9",
+      "action": "RestartJob",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Restart stalled job with monitoring. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ \n{\"name\":\"restartedJobId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \npreCondition = job_stalled \npostCondition = job_restarted_and_monitored \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "teSexTmGAqAKCQ2j",
+      "action": "StoreStatement",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Store document to object storage and update job status. \ninputs = [ \n{\"name\":\"statementId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"statementDocument\",\"type\":\"byte[]\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"downloadUrl\",\"type\":\"String\",\"target\":\"context\"}, \n{\"name\":\"jobStatus\",\"type\":\"String\",\"target\":\"context\"} \n] \nexceptions = [\"StorageUnavailable\"] \npreCondition = document_rendered \npostCondition = statement_stored_and_job_completed \nsideEffects = true \nretryPolicy = {\"maxAttempts\":3,\"backoffMs\":500,\"retryOn\":[\"Timeout\",\"502\",\"503\",\"StorageUnavailable\"],\"onRetryExhausted\": \"throw_StorageUnavailable\"}",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "UaauxTmGAqAKCQv1",
+      "action": "UaauxTmGAqAKCQv1",
+      "type": "uml:ForkNode",
+      "semanticType": "uml:ForkNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 3
+    },
+    {
+      "id": "72XsvzmGAqAAu03Y",
+      "action": "UseDefaultFormattingPreferences",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Use system default formatting preferences # when profile is unavailable \noutputs = [{\"name\": \"formattingPreferences\",\"type\": \"FormattingPreferences\", \"target\": \"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "i.uWxTmGAqAKCQp4",
+      "action": "ValidateStatementRequest",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate statement request parameters and check idempotency. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"request\"}, \n{\"name\":\"statementRequest\",\"type\":\"StatementRequest\",\"source\":\"request\"}, \n{\"name\":\"idempotencyKey\",\"type\":\"String\",\"source\":\"request\"}, \n{\"name\":\"customerId\",\"type\":\"UUID\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"target\":\"context\"}, \n{\"name\":\"existingStatementId\",\"type\":\"UUID?\",\"target\":\"context\"}, \n{\"name\":\"accountId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \nexceptions = [\"BadRequest\",\"Conflict\",\"NotFound\"] \npreCondition = customer_authenticated \npostCondition = request_validated_and_idempotency_checked \nsideEffects = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "Ut82xTmGAqAKCQrv",
+      "action": "jobStalled",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "NwdsvzmGAqAAu02v",
+      "action": "profileAvailable",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "wBDOxTmGAqAKCQuE",
+      "action": "retryableFailure",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "N11WxTmGAqAKCQqt",
+      "action": "statementStatus",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 4
+    }
+  ],
+  "edges": [
+    {
+      "from": "0mgmxTmGAqAKCQpg",
+      "to": "AuthenticateRequest",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "AuthenticateRequest",
+      "to": "ValidateStatementRequest",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ValidateStatementRequest",
+      "to": "EvaluateStatementStatus",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "EvaluateStatementStatus",
+      "to": "statementStatus",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "statementStatus",
+      "to": "BuildCompletedResponse",
+      "condition": "COMPLETED",
+      "kind": "next"
+    },
+    {
+      "from": "statementStatus",
+      "to": "CheckJobProgress",
+      "condition": "RUNNING",
+      "kind": "next"
+    },
+    {
+      "from": "statementStatus",
+      "to": "AnalyzeFailureReason",
+      "condition": "FAILED",
+      "kind": "next"
+    },
+    {
+      "from": "statementStatus",
+      "to": "CreateStatementJob",
+      "condition": "NOT_FOUND",
+      "kind": "next"
+    },
+    {
+      "from": "BuildCompletedResponse",
+      "to": "FlowJoinGenerateStatement",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinGenerateStatement",
+      "to": "C0uBxTmGAqAKCQ6q",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CheckJobProgress",
+      "to": "jobStalled",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "jobStalled",
+      "to": "RestartJob",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "jobStalled",
+      "to": "BuildRunningResponse",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "RestartJob",
+      "to": "BuildRestartedJobResponse",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildRestartedJobResponse",
+      "to": "FlowJoinJobStalled",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinJobStalled",
+      "to": "FlowJoinGenerateStatement",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildRunningResponse",
+      "to": "FlowJoinJobStalled",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "AnalyzeFailureReason",
+      "to": "retryableFailure",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "retryableFailure",
+      "to": "RecoverFailedJob",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "retryableFailure",
+      "to": "CreateNewStatementJob",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "RecoverFailedJob",
+      "to": "BuildRecoveryResponse",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CreateNewStatementJob",
+      "to": "BuildNewResponse",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinRetryableFailure",
+      "to": "FlowJoinGenerateStatement",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CreateStatementJob",
+      "to": "UaauxTmGAqAKCQv1",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "UaauxTmGAqAKCQv1",
+      "to": "LoadTransactions",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "UaauxTmGAqAKCQv1",
+      "to": "LoadFeesAndRates",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "UaauxTmGAqAKCQv1",
+      "to": "FetchAccountProfile",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "LoadTransactions",
+      "to": "IyduxTmGAqAKCQ1h",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "LoadFeesAndRates",
+      "to": "IyduxTmGAqAKCQ1h",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FetchAccountProfile",
+      "to": "profileAvailable",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "IyduxTmGAqAKCQ1h",
+      "to": "ComputeStatementTotals",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ComputeStatementTotals",
+      "to": "RenderStatementDocument",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "RenderStatementDocument",
+      "to": "StoreStatement",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "StoreStatement",
+      "to": "PublishStatementReady",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "PublishStatementReady",
+      "to": "BuildStatementResponse",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildRecoveryResponse",
+      "to": "FlowJoinRetryableFailure",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildNewResponse",
+      "to": "FlowJoinRetryableFailure",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "profileAvailable",
+      "to": "LoadFormattingPreferences",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "profileAvailable",
+      "to": "UseDefaultFormattingPreferences",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "LoadFormattingPreferences",
+      "to": "FlowJoinProfileResolved",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "UseDefaultFormattingPreferences",
+      "to": "FlowJoinProfileResolved",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinProfileResolved",
+      "to": "IyduxTmGAqAKCQ1h",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildStatementResponse",
+      "to": "FlowJoinGenerateStatement",
+      "condition": null,
+      "kind": "next"
+    }
+  ]
+}

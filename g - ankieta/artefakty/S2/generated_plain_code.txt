@@ -1,0 +1,50 @@
+REST DEFINITION   # @meta {"endpoint": "POST /contacts/import", "responseSuccess": "202 Accepted", "responseError": "400|401|403|409|422"}
+
+function main_Bulkimportcontacts():
+  AuthorizeOperator()  # @meta {"stereotype": "Security", "desc": "Ensure the caller is an operator allowed to import contacts for a tenant.", "inputs": [{"name": "authToken", "type": "JWT", "source": "request"}, {"name": "tenantId", "type": "UUID", "source": "request"}], "outputs": [{"name": "operatorId", "type": "UUID", "target": "context"}], "exceptions": ["Unauthorized", "Forbidden"]}
+  ValidateImportRequest()  # @meta {"stereotype": "Validation", "desc": "Validate import request includes file reference, format, and idempotency key.", "inputs": [{"name": "importRequest", "type": "ContactImportRequest", "source": "request"}, {"name": "idempotencyKey", "type": "String", "source": "request"}], "outputs": [{"name": "validatedImport", "type": "ValidatedImport", "target": "context"}], "exceptions": ["BadRequest"]}
+  CheckImportIdempotency()  # @meta {"stereotype": "Repository", "desc": "Ensure the idempotency key was not used before for this tenant to avoid duplicate imports.", "inputs": [{"name": "tenantId", "type": "UUID", "source": "request"}, {"name": "idempotencyKey", "type": "String", "source": "request"}], "outputs": [{"name": "existingImportId", "type": "UUID?", "target": "context"}], "exceptions": ["Conflict"], "sideEffects": true, "idempotent": true, "consistencyScope": "local-transaction"}
+  Decision(importAlreadyExists)
+  if yes:
+    ReturnExistingImport()  # @meta {"stereotype": "Mapper", "desc": "Return existing import reference without processing the file again.", "inputs": [{"name": "existingImportId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "ContactImportAcceptedResponse", "target": "response"}]}
+    FlowJoinBulkImportContacts()
+  if no:
+    LoadImportFile()  # @meta {"stereotype": "ExternalCall", "desc": "Download import file from object storage and verify checksum.", "inputs": [{"name": "validatedImport", "type": "ValidatedImport", "source": "context"}], "outputs": [{"name": "fileBytes", "type": "byte[]", "target": "context"}], "retryPolicy": {"maxAttempts": 3, "backoffMs": 300, "retryOn": ["Timeout", "502", "503"], "onRetryExhausted": "throw_StorageUnavailable"}, "exceptions": ["FileNotFound", "StorageUnavailable"], "sideEffects": false, "idempotent": true, "consistencyScope": "none"}
+    ParseCsvRows()  # @meta {"stereotype": "Mapper", "desc": "Parse CSV into a list of raw contact rows, preserving row numbers for error reporting.", "inputs": [{"name": "fileBytes", "type": "byte[]", "source": "context"}], "outputs": [{"name": "rows", "type": "RawContactRow[]", "target": "context"}, {"name": "totalRows", "type": "int", "target": "context"}]}
+    InitializeImportCounters()  # @meta {"stereotype": "Utility", "desc": "Initialize counters and an error collection for the import session.", "inputs": [{"name": "totalRows", "type": "int", "source": "context"}], "outputs": [{"name": "rowIndex", "type": "int", "target": "context"}, {"name": "importErrors", "type": "ImportError[]", "target": "context"}]}
+    FlowJoinProcessRow()
+
+function FlowJoinBulkImportContacts():
+  end()
+
+function FlowJoinProcessRow():
+  Decision(rowIndexLessTotalRows)
+  if yes:
+    ReadNextRow()  # @meta {"stereotype": "Mapper", "desc": "Read current row and normalize values (trim, casing, locale).", "inputs": [{"name": "rows", "type": "RawContactRow[]", "source": "context"}, {"name": "rowIndex", "type": "int", "source": "context"}], "outputs": [{"name": "currentRow", "type": "RawContactRow", "target": "context"}]}
+    ValidateRow()  # @meta {"stereotype": "Validation", "desc": "Validate required fields (email/phone), formats, and maximum lengths for the row.", "inputs": [{"name": "currentRow", "type": "RawContactRow", "source": "context"}], "outputs": [{"name": "rowValid", "type": "bool", "target": "context"}]}
+    Decision(rowValid)
+    if false:
+      AddRowValidationError()  # @meta {"stereotype": "Utility", "desc": "Append row-level validation errors with a human-friendly message.", "inputs": [{"name": "rowIndex", "type": "int", "source": "context"}, {"name": "currentRow", "type": "RawContactRow", "source": "context"}], "outputs": [{"name": "importErrors", "type": "ImportError[]", "target": "context"}]}
+      FlowJoinAfterRow()
+    if true:
+      FilterDuplicateInBatch()  # @meta {"stereotype": "Filter", "desc": "Skip duplicates within the current batch using email and phone as keys.", "inputs": [{"name": "currentRow", "type": "RawContactRow", "source": "context"}, {"name": "rows", "type": "RawContactRow[]", "source": "context"}], "outputs": [{"name": "notDuplicate", "type": "bool", "target": "context"}]}
+      Decision(notDuplicate)
+      if false:
+        AddBatchDuplicateError()  # @meta {"stereotype": "Utility", "desc": "Record a batch-duplicate error for the row and continue the loop.", "inputs": [{"name": "rowIndex", "type": "int", "source": "context"}, {"name": "currentRow", "type": "RawContactRow", "source": "context"}], "outputs": [{"name": "importErrors", "type": "ImportError[]", "target": "context"}]}
+        FlowJoinDuplicate()
+      if true:
+        MapRowToContact()  # @meta {"stereotype": "Mapper", "desc": "Convert row into domain Contact object using tenant defaults.", "inputs": [{"name": "tenantId", "type": "UUID", "source": "request"}, {"name": "currentRow", "type": "RawContactRow", "source": "context"}], "outputs": [{"name": "contact", "type": "Contact", "target": "context"}]}
+        UpsertContact()  # @meta {"stereotype": "Repository", "desc": "Upsert contact by email/phone and attach tags from import.", "inputs": [{"name": "tenantId", "type": "UUID", "source": "request"}, {"name": "contact", "type": "Contact", "source": "context"}], "outputs": [{"name": "contactId", "type": "UUID", "target": "context"}], "exceptions": ["Conflict"], "sideEffects": true, "idempotent": true, "consistencyScope": "local-transaction", "transactional": true}
+        FlowJoinDuplicate()
+  if no:
+    PersistImportSummary()  # @meta {"stereotype": "Repository", "desc": "Persist import summary including counts and error list for later retrieval.", "inputs": [{"name": "tenantId", "type": "UUID", "source": "request"}, {"name": "importErrors", "type": "ImportError[]", "source": "context"}], "outputs": [{"name": "importId", "type": "UUID", "target": "context"}], "sideEffects": true, "idempotent": false, "consistencyScope": "local-transaction", "transactional": true}
+    PublishImportCompleted()  # @meta {"stereotype": "Publisher", "desc": "Publish ContactImportCompleted with importId and number of processed rows.", "inputs": [{"name": "importId", "type": "UUID", "source": "context"}, {"name": "totalRows", "type": "int", "source": "context"}], "outputs": [{"name": "eventPublished", "type": "bool", "target": "event"}], "sideEffects": true, "idempotent": true, "consistencyScope": "eventual"}
+    BuildAcceptedResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response containing importId and a link to fetch results.", "inputs": [{"name": "importId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "ContactImportAcceptedResponse", "target": "response"}]}
+    FlowJoinBulkImportContacts()
+
+function FlowJoinAfterRow():
+  IncrementRowIndex()  # @meta {"stereotype": "Utility", "desc": "Increment row index and continue processing remaining rows.", "inputs": [{"name": "rowIndex", "type": "int", "source": "context"}], "outputs": [{"name": "rowIndex", "type": "int", "target": "context"}]}
+  FlowJoinProcessRow()
+
+function FlowJoinDuplicate():
+  FlowJoinAfterRow()

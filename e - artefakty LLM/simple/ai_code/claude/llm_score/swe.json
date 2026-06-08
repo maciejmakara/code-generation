@@ -1,0 +1,54 @@
+{
+  "structural": {
+    "score": 1.0,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": []
+  },
+  "semantic": {
+    "score": 0.95,
+    "issues": [
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "JWT decoding implementation is simulated with UUID conversion rather than proper cryptographic validation"
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "EmailClient retry_on includes TimeoutError but spec only mentions HTTP status codes 502/503"
+      }
+    ],
+    "reasoning": "The implementation correctly follows the specification's control flow, data flow, and business logic. All required actions are present with proper input/output mapping. The decision point correctly branches based on cancellable status. Exception handling matches the specification with proper HTTP status code mapping. Transaction boundaries are correctly implemented for the CancelSubscription action. The retry policy for email sending is correctly implemented with log_and_continue behavior. Minor deviations: JWT validation is simulated rather than cryptographically secure, and retry policy includes TimeoutError beyond the specified HTTP status codes."
+  },
+  "specification": {
+    "score": 0.875,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 1.0,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "SendCancellationEmail retryPolicy",
+        "description": "retryPolicy specifies retryOn=[\"Timeout\", \"502\", \"503\"] but mixes exception types (Timeout) with HTTP status codes (502, 503) without clear mapping",
+        "suggestedFix": "Clarify whether Timeout refers to TimeoutError exception or HTTP timeout status code, and ensure consistent exception type specification"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+dataset,scenario,file_id,avg_score,count,has_good_spec
+all,fork,1,0.25,2,0
+all,fork,2,0.5,2,1
+all,loop,1,1.0,2,0
+all,loop,2,0.0,2,1
+all,simple,1,0.0,2,0
+all,simple,2,0.5,2,0
+all,trycatch,1,1.0,2,0
+all,trycatch,2,0.5,2,0
+filtered,fork,1,0.25,2,0
+filtered,loop,1,1.0,2,0
+filtered,simple,1,0.0,2,0
+filtered,simple,2,0.5,2,0
+filtered,trycatch,1,1.0,2,0
+filtered,trycatch,2,0.5,2,0

@@ -1,0 +1,10 @@
+category,evaluator_a,evaluator_b,n_pairs,pearson
+structural,claude,gpt,12,0.7777496953977899
+structural,claude,swe,12,0.2722638636181898
+structural,gpt,swe,12,0.5046901658103528
+semantic,claude,gpt,12,0.6521671660482491
+semantic,claude,swe,12,0.016319906733709273
+semantic,gpt,swe,12,-0.018610381469483
+specification,claude,gpt,12,0.3365263930691972
+specification,claude,swe,12,0.13566837543952898
+specification,gpt,swe,12,0.8094718458501381

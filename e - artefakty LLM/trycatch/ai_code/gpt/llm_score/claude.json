@@ -1,0 +1,151 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 0.5,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S4",
+        "score": 0.5,
+        "finding": "The spec has no FlowJoin calling Decision, so there is no loop in the specification. Decision(isTimeout) with BackToDecision is a try-catch/exception-routing structure, not iteration. The implementation uses a while True loop with decision_state transitions to model BackToDecision, which is a valid mechanical encoding of the re-entry pattern, but it introduces loop semantics (continue, while True) that do not exist in the spec. The spec's BackToDecision is a one-way jump, not an iterative construct. The implementation is functionally equivalent but structurally overstates looping.",
+        "severity": "minor"
+      },
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Three additions beyond spec: (1) FlowJoinRegistration() is implemented as a standalone Python function at module level — the spec defines it only as a convergence point within control flow, not as a callable function; the Python function is never actually called in the happy path or error path, making it dead code. (2) A defensive RuntimeError guard ('Unknown decision state') is added inside the while loop with no spec basis. (3) x_request_id header injection and its propagation into ErrorResponse.request_id has no basis in the spec.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.82,
+    "issues": [
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "CheckEmailUniqueness() can raise TimeoutException, but it executes before Decision(isTimeout). The code acknowledges this in a comment and falls through to the outer except TimeoutException handler, which returns 504 without calling HandleRegistrationTimeout(). Per spec, HandleRegistrationTimeout() is the designated handler for all TimeoutExceptions within the Decision(isTimeout) scope; however, since CheckEmailUniqueness is structurally outside that scope, the outer handler is a reasonable but unspecified interpretation. The spec is ambiguous on this boundary."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "SendActivationEmail retryPolicy.onRetryExhausted is 'raise', meaning on exhaustion a TimeoutException propagates. Inside the while loop this is caught and routes decision_state to 'exception', then HandleRegistrationTimeout() is called and 504 is returned — correct. However, if execute_with_retry returns None (the on_retry_exhausted='raise' branch always re-raises, so this path is unreachable in practice), emailSentStatus would be None and the code would proceed to oksendactivationemail with a falsy status. This is not a runtime bug given current logic but represents a latent fragility."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "CreateUserAccount wraps only repository.create_user() inside the transaction context manager. The auditRequired=true side effect (audit_if_required call) executes before the transaction begins, meaning audit is written even if the transaction rolls back. For a transactional action with auditRequired=true the audit should either be inside the transaction or deferred to post-commit."
+      },
+      {
+        "aspect": "state_transitions",
+        "severity": "minor",
+        "description": "HandleRegistrationTimeout() self-validates its own post-condition by checking errorResponse.details['registrationStatus'] == 'Failed' — a value it just set on the line above. This is a tautological check that can never fail and provides no real post-condition enforcement. The spec's postCondition='registrationStatus_Failed' implies an external state (e.g., persisting a failure status for the user record), which is not implemented."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The catch-all except Exception block maps to HTTP 400 Bad Request. The spec declares responseError as 400|409|422|504. An unexpected internal error arguably maps to none of these; 500 would be more appropriate. Using 400 for unhandled server-side exceptions conflates client error semantics with server fault semantics, though 500 is also not in the spec's declared error set."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "FilterDisposableEmailDomains() raises DisposableEmailDetected on blocked domains but also returns True on allowed domains. The spec declares outputs=[emailAllowed: bool -> context]. The exception path never sets context.emailAllowed — it propagates out. This is consistent with the spec's exception semantics, but the Decision(isTimeout) branch label 'okfilterdisposableemaildomains' implicitly relies on emailAllowed being true in context; the code never checks context.emailAllowed inside the decision loop, it simply enters the loop after FilterDisposableEmailDomains returns without throwing. This is functionally correct but the context field serves no decision-driving purpose."
+      }
+    ],
+    "reasoning": "The implementation correctly captures all six actions, the BackToDecision-based exception routing via decision_state machine, retry policy for SendActivationEmail with onRetryExhausted=raise, transaction boundaries for CreateUserAccount and FinalizeRegistration, audit calls for FilterDisposableEmailDomains and CreateUserAccount, and all four HTTP error status codes. The main semantic gaps are: audit leaking outside transaction scope, a tautological post-condition check in HandleRegistrationTimeout, the unused module-level FlowJoinRegistration function never actually being invoked at convergence points, and the ambiguous handling of TimeoutException from CheckEmailUniqueness (outside the Decision scope) bypassing HandleRegistrationTimeout. These are minor deviations that do not compromise the primary happy-path or the primary error-path correctness."
+  },
+  "specification": {
+    "score": 0.59,
+    "breakdown": {
+      "actions_completeness": 0.5,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.0,
+      "termination_definitions": 0.5
+    },
+    "defects": [
+      {
+        "criterion": "decision_conditions",
+        "score": 0.0,
+        "defectType": "ambiguous",
+        "location": "Decision(isTimeout)",
+        "description": "The Decision node is named 'isTimeout' but the branch labels are 'okfilterdisposableemaildomains', 'exception', 'okcreateuseraccount', and 'oksendactivationemail'. The decision name implies a binary timeout check, but the branches implement a multi-state routing based on which prior action completed. The condition being evaluated at the Decision point is never formally stated. A generator cannot unambiguously determine whether the Decision tests a single boolean flag, inspects a state enum, or is a structural join-point router.",
+        "suggestedFix": "Rename Decision to reflect its true role (e.g., Decision(registrationPhase)) and explicitly define the condition expression: e.g., condition='currentPhase in {okfilterdisposableemaildomains, okcreateuseraccount, oksendactivationemail, exception}'. Alternatively, decompose into separate Decision nodes per phase transition."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness()",
+        "description": "CheckEmailUniqueness declares exceptions=[TimeoutException, ConflictException] and is placed before Decision(isTimeout). It is not inside any branch of the Decision, so it is unclear whether a TimeoutException from this action should route to the 'exception' branch of Decision(isTimeout) or be handled separately. The spec provides no explicit flow for this case.",
+        "suggestedFix": "Either move CheckEmailUniqueness() inside the Decision scope with an explicit BackToDecision, or add a separate exception flow arrow from CheckEmailUniqueness to a defined handler outside Decision(isTimeout)."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "FilterDisposableEmailDomains()",
+        "description": "FilterDisposableEmailDomains declares exception DisposableEmailDetected but no exception flow or handler is defined in the spec for this exception. There is no branch, BackToDecision, or FlowJoin handling it. A generator must invent handling behavior (e.g., return 400) without spec guidance.",
+        "suggestedFix": "Add an explicit exception branch: 'if DisposableEmailDetected: HandleDisposableEmail() -> FlowJoinRegistration()' or annotate with a response mapping."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness()",
+        "description": "CheckEmailUniqueness declares no outputs. After a successful (non-throwing) execution, there is no context output defined. The downstream actions do not depend on it, so this is acceptable, but the absence of an explicit output or side-effect-free confirmation makes the action's success signal implicit.",
+        "suggestedFix": "Add output: {name: 'emailUnique', type: 'bool', target: 'context'} or explicitly annotate as a guard-only action with no output."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "FilterDisposableEmailDomains() -> outputs: emailAllowed",
+        "description": "emailAllowed is declared as an output written to context, but the Decision(isTimeout) branch label 'okfilterdisposableemaildomains' does not reference this context value. It is never stated whether the decision evaluates context.emailAllowed == true or simply proceeds because no exception was thrown. The output appears to be a dead context value.",
+        "suggestedFix": "Either remove emailAllowed from outputs if the control flow is purely exception-driven, or explicitly reference it in the Decision condition definition."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "HandleRegistrationTimeout() postCondition=registrationStatus_Failed",
+        "description": "postCondition 'registrationStatus_Failed' implies a persistent state change (e.g., a database record marking the registration attempt as failed), but no repository action or side-effect is specified to achieve this. The action is an ErrorHandler with no sideEffects flag and no repository call defined.",
+        "suggestedFix": "Either add sideEffects=true with a repository call to persist the failed status, or clarify that registrationStatus_Failed refers only to the response payload state and not a persistent entity state."
+      },
+      {
+        "criterion": "actions_completeness",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "SendActivationEmail()",
+        "description": "SendActivationEmail lacks sideEffects, idempotent, and consistencyScope metadata. As an ExternalCall with retry logic, these fields are particularly relevant for generators reasoning about at-least-once delivery guarantees and compensating behavior.",
+        "suggestedFix": "Add: sideEffects=true, idempotent=false (or true if the email service deduplicates by userId), consistencyScope=eventual."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CreateUserAccount() + FinalizeRegistration()",
+        "description": "Both actions declare transactional=true and consistencyScope=local-transaction but they are separated by an external call (SendActivationEmail). It is not specified whether they participate in the same transaction, separate transactions, or whether a saga/compensation pattern is required if FinalizeRegistration fails after CreateUserAccount succeeds.",
+        "suggestedFix": "Add a transactionGroup identifier to both actions if they must be atomic together, or explicitly document them as independent local transactions with a compensation action for CreateUserAccount if FinalizeRegistration fails."
+      },
+      {
+        "criterion": "termination_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "FlowJoinRegistration()",
+        "description": "FlowJoinRegistration is called from two paths: after HandleRegistrationTimeout (error path) and after FinalizeRegistration (success path). The function definition only contains end(), but the HTTP response codes differ between the two paths (504 vs 201). The spec does not define how FlowJoinRegistration distinguishes or delegates to the correct response, requiring generators to infer response mapping from context.",
+        "suggestedFix": "Either split into two join functions (FlowJoinRegistrationSuccess, FlowJoinRegistrationError) each with explicit response mappings, or annotate FlowJoinRegistration with conditional response logic based on context state."
+      }
+    ]
+  }
+}

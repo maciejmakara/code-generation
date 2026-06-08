@@ -1,0 +1,54 @@
+{
+  "structural": {
+    "score": 1.0,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": []
+  },
+  "semantic": {
+    "score": 0.90,
+    "issues": [
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "EventBusUnavailable mapped to 409 instead of 503, but 503 not in allowed response codes per spec"
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "RejectCancellation unreachable FlowJoin line kept for explicitness but never executed due to exception"
+      }
+    ],
+    "reasoning": "Code correctly implements all specification elements with proper data flow, transaction boundaries, and retry semantics. Minor deviations: EventBusUnavailable mapped to 409 (reasonable compromise given spec constraints), and unreachable FlowJoin line after RejectCancellation (kept for explicitness). All core business logic, security, and control flow patterns are correctly implemented."
+  },
+  "specification": {
+    "score": 0.94,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 0.75,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 1.0,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "state_definitions",
+        "score": 0.75,
+        "defectType": "incomplete",
+        "location": "CheckCancellationEligibility",
+        "description": "Business rule conditions for cancellation eligibility not explicitly defined in specification",
+        "suggestedFix": "Add explicit preCondition defining eligibility criteria (status != CANCELED, !billing_cycle_locked, !outstanding_invoice)"
+      }
+    ]
+  }
+}

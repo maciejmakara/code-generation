@@ -1,0 +1,5 @@
+GPT - 0
+rzuca wyjatek, zwraca blad 422, przerywa flow
+
+Claude - 0
+Rzuca wyjatek, zwraca blad 502, przerywa flow

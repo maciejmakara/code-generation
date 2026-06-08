@@ -1,0 +1,160 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Several additions beyond the spec: (1) store_idempotency_record() is an extra method called explicitly in FlowJoinProcessRow after PersistImportSummary — no such action exists in the spec flow; (2) FilterService uses a stateful seen_keys set on the service instance rather than deriving duplicates purely from the rows[] context input declared in the spec — this introduces instance-level mutable state not defined in the spec; (3) a GET /contacts/imports/{import_id} endpoint is added, not part of the spec; (4) ContactImportRequest adds a mandatory checksum_sha256 field not present in the spec's ContactImportRequest definition; (5) ValidateImportRequest enforces CSV-only format which is not stated in the spec; (6) FlowJoinBulkImportContacts raises BadRequest when context.response is None — this is defensive logic not modeled in the spec.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.79,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "CheckImportIdempotency raises Conflict (HTTP 409) only when tenantId or idempotencyKey are falsy. The spec declares Conflict as the exception for this action in the context of a race-condition or duplicate-key collision scenario, not for missing inputs. Missing inputs are a BadRequest concern. The actual Conflict use-case (concurrent duplicate registration) is never raised, making the 409 path from this action effectively dead for its intended purpose."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "UpsertContact raises Conflict only when contact is None (a programming error / null guard). The spec declares Conflict for concurrent write collisions or upsert constraint violations. The real Conflict scenario (e.g., optimistic locking failure) is never implemented. Additionally, a ConflictException propagating out of the row loop would abort the entire import rather than being handled per-row — the spec defines no flow exit from the row loop on UpsertContact conflict, making this an undeclared abort path."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "blocking",
+        "description": "FilterDuplicateInBatch uses a stateful seen_keys set on the FilterService instance. This means the filter state persists across multiple HTTP requests handled by the same singleton orchestrator instance, causing cross-request contamination. The spec declares inputs as currentRow and rows[] (source: context), implying the duplicate check should be stateless and derived entirely from the current request's context."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "FileNotFound is mapped to HTTP 422 (status_code = HTTP_422_UNPROCESSABLE_ENTITY) in the exception class definition. The spec lists FileNotFound under LoadImportFile exceptions but maps 422 only to business validation failures. FileNotFound is more appropriately 404 or 400. The spec responseError list includes 400 but not 404 for this endpoint, so 400 would be the correct mapping, yet 422 is used instead."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "StorageUnavailable is mapped to HTTP 503 in the exception class. The spec responseError list for this endpoint is 400|401|403|409|422 — 503 is not declared. Returning 503 widens the HTTP contract beyond the spec."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "FlowJoinProcessRow is implemented as an async method with an internal while True loop with explicit continue/return statements. The FlowJoinAfterRow and FlowJoinDuplicate functions are called but their return is ignored (they only mutate context.row_index) and the loop continues via the enclosing while True. This is structurally correct but the explicit 'raise BadRequest' guards at the end of both Decision branches (rowValid and notDuplicate) are unreachable dead code since the conditions are bool, making those guards extra behavior."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "store_idempotency_record is called as a separate transaction after PersistImportSummary commits. If store_idempotency_record fails, the import summary is persisted without a corresponding idempotency key, meaning a retry of the same request would process the file again (idempotency broken). The spec implies idempotency key registration should be atomic with the import summary commit, though this is not explicitly stated."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "HTTP 422 is declared in responseError but is used for FileNotFound (which should be a storage/retrieval error, not a semantic validation error). The intended 422 use-case (UnprocessableEntity from business validation) has no corresponding exception class or flow path in the implementation."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The ContactImportRequest model adds a mandatory checksum_sha256 field not present in the spec's declared inputs for ValidateImportRequest or LoadImportFile. This changes the HTTP request contract — callers must now supply a checksum that the spec does not require, making the endpoint incompatible with spec-compliant clients."
+      }
+    ],
+    "reasoning": "The implementation correctly covers all 16 spec actions, all three Decision branches, the row-processing loop via FlowJoinProcessRow as a while loop, the FlowJoinDuplicate→FlowJoinAfterRow→IncrementRowIndex chain, and both terminal paths via FlowJoinBulkImportContacts. The orchestrator pattern cleanly separates concerns and maps each action to a distinct service method. The retry policy for LoadImportFile correctly maps onRetryExhausted to throw_StorageUnavailable. However, three blocking issues reduce the score significantly: (1) FilterDuplicateInBatch has cross-request state contamination via a singleton seen_keys set; (2) CheckImportIdempotency and UpsertContact never raise Conflict for their intended scenarios; (3) UpsertContact conflicts would abort the entire import loop if they occurred. Several minor HTTP contract deviations (503 not in spec, 422 misuse, extra checksum field) further reduce confidence. The happy path is well-implemented; edge cases and error flows have notable gaps."
+  },
+  "specification": {
+    "score": 0.625,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 0.5,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "FilterDuplicateInBatch",
+        "description": "The inputs declare currentRow and rows: RawContactRow[] (source: context) but the comparison window is ambiguous. It is unclear whether 'rows' means the full batch array or only rows already processed (rows[0..rowIndex-1]). Two implementations are equally valid: scan all prior rows, or maintain a seen-keys set. The spec does not specify the deduplication data structure or state lifecycle.",
+        "suggestedFix": "Clarify desc: 'Checks whether currentRow duplicates any previously processed row in the current batch (rows[0..rowIndex-1]) using email and phone as composite key. No persistent state is maintained between rows — the comparison is derived from the rows[] and rowIndex context values.'"
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckImportIdempotency",
+        "description": "The action declares sideEffects=true suggesting it writes a record, but the outputs only show existingImportId (UUID?) as a read result. It is unclear whether this action also writes a lock/reservation for the idempotency key, or whether key registration happens later (e.g., in PersistImportSummary). This ambiguity caused the implementation to add a separate store_idempotency_record step outside the spec flow.",
+        "suggestedFix": "Clarify sideEffects=true by adding to desc: 'Atomically reads and optionally reserves the idempotency key (e.g., via upsert-or-read). If a concurrent request races to register the same key, raise Conflict. Key is finalized with the importId only after PersistImportSummary commits.' Alternatively, move idempotency key write responsibility to PersistImportSummary explicitly."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "UpsertContact",
+        "description": "UpsertContact has no preCondition or postCondition specified. It declares transactional=true and exceptions=[Conflict] but gives no definition of when Conflict is raised (concurrent write, constraint violation, or both), nor what the post-state looks like (contact updated vs. inserted).",
+        "suggestedFix": "Add postCondition: 'Contact record exists in DB with contactId assigned; tags are merged (union) with existing tags.' Add to desc: 'Conflict is raised on optimistic lock failure (concurrent write to same email/phone key). Email/phone duplicates across tenants are not a conflict — they are resolved by the upsert logic.'"
+      },
+      {
+        "criterion": "action_semantics",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "LoadImportFile",
+        "description": "The desc says 'Download import file from object storage and verify checksum' but the ContactImportRequest inputs do not include a checksum field. There is no declared input for the expected checksum value, making it impossible to implement checksum verification from the spec alone without adding an extra field.",
+        "suggestedFix": "Add checksum input to LoadImportFile: {name: 'expectedChecksum', type: 'String', source: 'context'} (derived from validatedImport), or add checksumSha256 to the ValidatedImport type output of ValidateImportRequest, or remove checksum verification from the desc if it is not intended."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "inconsistent",
+        "location": "CheckImportIdempotency and PersistImportSummary",
+        "description": "CheckImportIdempotency has sideEffects=true (implies write) and PersistImportSummary is transactional=true. It is not specified whether the idempotency key write and the import summary commit must be in the same transaction. If they are separate transactions and PersistImportSummary fails after an idempotency key reservation, the key is consumed for a failed import — subsequent retries would return a ghost importId.",
+        "suggestedFix": "Add a note to PersistImportSummary: 'Idempotency key finalization (binding key to importId) must be committed within the same local-transaction as the import summary record.' Or clarify in CheckImportIdempotency that it only reads (remove sideEffects=true) and key registration is PersistImportSummary's responsibility."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "UpsertContact / row loop",
+        "description": "UpsertContact declares exceptions=[Conflict] but no error-handling branch or per-row recovery pattern is defined for this exception. The spec does not indicate whether a per-row Conflict should abort the import (propagate), be added to importErrors and continue, or be retried.",
+        "suggestedFix": "Add an explicit error branch after UpsertContact in the spec: either 'on Conflict: AddRowConflictError() → FlowJoinAfterRow (continue loop)' or 'on Conflict: propagate Conflict (409) and abort'. Document the chosen behavior so generators can implement it deterministically."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "PublishImportCompleted",
+        "description": "PublishImportCompleted has no exceptions declared and no retryPolicy, but it is a Publisher with eventual consistency. If the event bus is unavailable, there is no defined fallback (retry, outbox, log-and-continue, or abort). The spec is silent on failure handling for this action.",
+        "suggestedFix": "Add either retryPolicy: {maxAttempts: 3, backoffMs: 500, retryOn: ['Timeout'], onRetryExhausted: 'log_and_continue'} or exceptions: ['EventBusUnavailable'] with a defined handling strategy (e.g., outbox pattern recommendation in desc)."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(importAlreadyExists)",
+        "description": "The decision condition 'importAlreadyExists' is not formally defined. Its evaluation criterion (existingImportId != null) is implied but not stated. Branch labels 'yes'/'no' are informal.",
+        "suggestedFix": "Rename branches to 'existingImportId != null' and 'existingImportId == null', or add annotation: 'importAlreadyExists evaluates to true when CheckImportIdempotency returns a non-null existingImportId.'"
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(rowIndexLessTotalRows)",
+        "description": "The loop boundary condition name implies rowIndex < totalRows but the index base (0-based vs 1-based) and empty-file behavior are not specified. When totalRows=0, the 'no' branch should fire immediately, but this is not documented.",
+        "suggestedFix": "Add to InitializeImportCounters desc: 'rowIndex is initialized to 0 (zero-based).' Add annotation to Decision(rowIndexLessTotalRows): 'Evaluates to true when rowIndex < totalRows (0-based). When totalRows=0 the no branch is taken immediately.'"
+      }
+    ]
+  }
+}

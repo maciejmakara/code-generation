@@ -1,0 +1,1062 @@
+{
+  "normal_rows": [
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1a",
+      "label": "not_found profile available:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1b",
+      "label": "not_found default formatting:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1c",
+      "label": "not_found data corruption:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2a",
+      "label": "completed:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2b",
+      "label": "running not stalled:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2c",
+      "label": "running stalled:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2d",
+      "label": "failed retryable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2e",
+      "label": "failed non retryable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3a",
+      "label": "join waits for all:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3b",
+      "label": "default formatting with null profile:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3c",
+      "label": "store retry exhausted:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1a",
+      "label": "success 3 valid rows:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1b",
+      "label": "success 1 valid row:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1c",
+      "label": "idempotent repeat:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2a",
+      "label": "mixed content:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2b",
+      "label": "all invalid:",
+      "status": "FAIL",
+      "passed": false,
+      "detail": "should persist 0 contacts. Expected=0, actual=1",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2c",
+      "label": "duplicate in batch:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3a",
+      "label": "empty CSV:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3b",
+      "label": "storage unavailable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2c",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3c",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1a",
+      "label": "okFilterDisposableEmailDomains success path:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "normal",
+      "test_id": "T1b",
+      "label": "okCreateUserAccount after email retry:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2a",
+      "label": "timeout on CreateUserAccount branch:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "normal",
+      "test_id": "T2b",
+      "label": "timeout on SendActivationEmail branch:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3a",
+      "label": "ConflictException before decision:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3b",
+      "label": "DisposableEmailDetected before decision:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "normal",
+      "test_id": "T3c",
+      "label": "ValidationException before decision:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    }
+  ],
+  "strict_final_rows": [
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1a",
+      "label": "not_found profile available:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1b",
+      "label": "not_found default formatting:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1c",
+      "label": "not_found data corruption:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2a",
+      "label": "completed:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2b",
+      "label": "running not stalled:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2c",
+      "label": "running stalled:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2d",
+      "label": "failed retryable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2e",
+      "label": "failed non retryable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3a",
+      "label": "join waits for all:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3b",
+      "label": "default formatting with null profile:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3c",
+      "label": "store retry exhausted:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1a",
+      "label": "success 3 valid rows:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1b",
+      "label": "success 1 valid row:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1c",
+      "label": "idempotent repeat:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2a",
+      "label": "mixed content:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2b",
+      "label": "all invalid:",
+      "status": "FAIL",
+      "passed": false,
+      "detail": "should persist 0 contacts. Expected=0, actual=1",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2c",
+      "label": "duplicate in batch:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3a",
+      "label": "empty CSV:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3b",
+      "label": "storage unavailable:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2c",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3a",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3b",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3c",
+      "label": "",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1a",
+      "label": "okFilterDisposableEmailDomains success path:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "strict_final",
+      "test_id": "T1b",
+      "label": "okCreateUserAccount after email retry:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2a",
+      "label": "timeout after CreateUserAccount:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "strict_final",
+      "test_id": "T2b",
+      "label": "timeout after SendActivationEmail:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3a",
+      "label": "ConflictException before decision:",
+      "status": "PASS",
+      "passed": true,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3b",
+      "label": "DisposableEmailDetected before Decision:",
+      "status": "FAIL",
+      "passed": false,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "strict_final",
+      "test_id": "T3c",
+      "label": "ValidationException before Decision:",
+      "status": "FAIL",
+      "passed": false,
+      "detail": "",
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\ai_code\\gpt\\functional_tests\\3"
+    }
+  ],
+  "file_summary": [
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "view": "strict_final",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "normal",
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "view": "strict_final",
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "fork",
+      "file_id": "3",
+      "view": "strict_final",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "view": "strict_final",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "normal",
+      "passed": 2,
+      "failed": 1,
+      "total": 3,
+      "pass_rate": 0.6666666666666666,
+      "failed_tests": "T2b"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "view": "strict_final",
+      "passed": 2,
+      "failed": 1,
+      "total": 3,
+      "pass_rate": 0.6666666666666666,
+      "failed_tests": "T2b"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "normal",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "loop",
+      "file_id": "3",
+      "view": "strict_final",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "normal",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "view": "strict_final",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "view": "strict_final",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "simple",
+      "file_id": "3",
+      "view": "strict_final",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "normal",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "view": "strict_final",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "normal",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "view": "strict_final",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "normal",
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "pass_rate": 1.0,
+      "failed_tests": ""
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "3",
+      "view": "strict_final",
+      "passed": 1,
+      "failed": 2,
+      "total": 3,
+      "pass_rate": 0.3333333333333333,
+      "failed_tests": "T3b,T3c"
+    }
+  ],
+  "scenario_summary": [
+    {
+      "scenario": "fork",
+      "view": "normal",
+      "passed": 11,
+      "failed": 0,
+      "total": 11,
+      "pass_rate": 1.0
+    },
+    {
+      "scenario": "fork",
+      "view": "strict_final",
+      "passed": 11,
+      "failed": 0,
+      "total": 11,
+      "pass_rate": 1.0
+    },
+    {
+      "scenario": "loop",
+      "view": "normal",
+      "passed": 7,
+      "failed": 1,
+      "total": 8,
+      "pass_rate": 0.875
+    },
+    {
+      "scenario": "loop",
+      "view": "strict_final",
+      "passed": 7,
+      "failed": 1,
+      "total": 8,
+      "pass_rate": 0.875
+    },
+    {
+      "scenario": "simple",
+      "view": "normal",
+      "passed": 8,
+      "failed": 0,
+      "total": 8,
+      "pass_rate": 1.0
+    },
+    {
+      "scenario": "simple",
+      "view": "strict_final",
+      "passed": 8,
+      "failed": 0,
+      "total": 8,
+      "pass_rate": 1.0
+    },
+    {
+      "scenario": "trycatch",
+      "view": "normal",
+      "passed": 7,
+      "failed": 0,
+      "total": 7,
+      "pass_rate": 1.0
+    },
+    {
+      "scenario": "trycatch",
+      "view": "strict_final",
+      "passed": 5,
+      "failed": 2,
+      "total": 7,
+      "pass_rate": 0.7142857142857143
+    }
+  ]
+}

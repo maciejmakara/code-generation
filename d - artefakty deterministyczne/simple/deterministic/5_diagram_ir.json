@@ -1,0 +1,183 @@
+{
+  "activity": "Cancel subscription",
+  "nodes": [
+    {
+      "id": "9D.xSdmGAqAArgoH",
+      "action": "9D.xSdmGAqAArgoH",
+      "type": "uml:InitialNode",
+      "semanticType": "uml:InitialNode",
+      "stereotype": null,
+      "comment": "endpoint = DELETE /subscriptions/{subscriptionId}\nresponseSuccess = 204 No Content\nresponseError = 400|401|403|404|409|422",
+      "in": 0,
+      "out": 1
+    },
+    {
+      "id": "XqxxSdmGAqAArgoS",
+      "action": "AuthorizeCustomer",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Security",
+      "comment": "desc = Verify requester is authenticated and owns the subscription.\ninputs = [\n{\"name\":\"authToken\",\"type\":\"JWT\",\"source\":\"request\"},\n{\"name\":\"subscriptionId\",\"type\":\"UUID\",\"source\":\"request\"}\n]\noutputs = [{\"name\":\"customerId\",\"type\":\"UUID\",\"target\":\"context\"}]\nexceptions = [\"Unauthorized\",\"Forbidden\"]\nsecurityContext = Role_Customer",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "DaXxSdmGAqAArgpW",
+      "action": "CancelSubscription",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Mark subscription as CANCELED and store cancellation timestamp and reason.\ninputs = [\n{\"name\":\"subscriptionId\",\"type\":\"UUID\",\"source\":\"request\"},\n{\"name\":\"cancelReason\",\"type\":\"String?\",\"source\":\"request\"},\n{\"name\": \"subscription\",\"type\":\"Subscription\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"canceledSubscription\",\"type\":\"Subscription\",\"target\":\"context\"}]\npostCondition = \"subscription.status == CANCELED\"\nsideEffects = true\nidempotent = true\nconsistencyScope = \"local-transaction\"\ntransactional = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "D69xSdmGAqAArgo2",
+      "action": "CheckCancellationEligibility",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Determine whether cancellation is allowed (status, billing cycle, outstanding invoice).\ninputs = [{\"name\":\"subscription\",\"type\":\"Subscription\",\"source\":\"context\"}]\noutputs = [{\"name\":\"cancellable\",\"type\":\"bool\",\"target\":\"context\"}]\nexceptions = [\"UnprocessableEntity\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "YCtJSdmGAqAArgqT",
+      "action": "FlowJoinCancelSubscription",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": ".JFxSdmGAqAArgok",
+      "action": "LoadSubscription",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Load subscription from database.\ninputs = [{\"name\":\"subscriptionId\",\"type\":\"UUID\",\"source\":\"request\"}]\noutputs = [{\"name\":\"subscription\",\"type\":\"Subscription\",\"target\":\"context\"}]\nexceptions = [\"NotFound\"]\nsideEffects = false\nidempotent = true\nconsistencyScope = \"none\"",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "4OyJSdmGAqAArgp0",
+      "action": "PublishSubscriptionCanceled",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Publisher",
+      "comment": "desc = Publish SubscriptionCanceled domain event.\ninputs = [{\"name\":\"canceledSubscription\",\"type\":\"Subscription\",\"source\":\"context\"}]\noutputs = [{\"name\":\"eventPublished\",\"type\":\"bool\",\"target\":\"event\"}]\npostCondition = event_published\nsideEffects = true\nexceptions = [\"EventBusUnavailable\"]\nidempotent = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "xIIJSdmGAqAArgpk",
+      "action": "RejectCancellation",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Return 422 when subscription cannot be canceled.\ninputs = [{\"name\":\"subscription\",\"type\":\"Subscription\",\"source\":\"context\"}]\noutputs = [{\"name\":\"response\",\"type\":\"ErrorResponse\",\"target\":\"response\"}]\nexceptions = [\"UnprocessableEntity\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "m.hJSdmGAqAArgqD",
+      "action": "SendCancellationEmail",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Send confirmation email to customer. Operation is best-effort – failure does not roll back cancellation.\ninputs = [\n{\"name\":\"customerId\",\"type\":\"UUID\",\"source\":\"context\"},\n{\"name\":\"subscriptionId\",\"type\":\"UUID\",\"source\":\"request\"}\n]\noutputs = [{\"name\":\"emailSent\",\"type\":\"bool\",\"target\":\"context\"}]\nexceptions = [\"EmailProviderError\"]\nretryPolicy = {\"maxAttempts\":3,\"backoffMs\":300,\"retryOn\":[\"Timeout\",\"502\",\"503\"],\"onRetryExhausted\":\"log_and_continue\"}",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "OPrxSdmGAqAArgpI",
+      "action": "cancellable?",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "q3rJSdmGAqAArgqw",
+      "action": "q3rJSdmGAqAArgqw",
+      "type": "uml:ActivityFinalNode",
+      "semanticType": "uml:ActivityFinalNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "9D.xSdmGAqAArgoH",
+      "to": "AuthorizeCustomer",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "AuthorizeCustomer",
+      "to": "LoadSubscription",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "LoadSubscription",
+      "to": "CheckCancellationEligibility",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CheckCancellationEligibility",
+      "to": "cancellable?",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "cancellable?",
+      "to": "CancelSubscription",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "cancellable?",
+      "to": "RejectCancellation",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "CancelSubscription",
+      "to": "PublishSubscriptionCanceled",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "RejectCancellation",
+      "to": "FlowJoinCancelSubscription",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "PublishSubscriptionCanceled",
+      "to": "SendCancellationEmail",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "SendCancellationEmail",
+      "to": "FlowJoinCancelSubscription",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinCancelSubscription",
+      "to": "q3rJSdmGAqAArgqw",
+      "condition": null,
+      "kind": "next"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 0.5,
+      "no_extra_behavior": 1.0
+    },
+    "issues": [
+      {
+        "criterion": "S6",
+        "score": 0.5,
+        "finding": "FlowJoinBulkImportContacts() is implemented as a no-op async function and does not explicitly terminate or return control; termination is implicit rather than clearly modeled as per specification.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.82,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "Retry policy for LoadImportFile does not strictly follow spec: retryOn conditions (Timeout, 502, 503) are not explicitly checked; generic exception handling is used and may retry on unintended errors."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "onRetryExhausted behavior should throw StorageUnavailable, but current implementation conditionally checks error message content instead of enforcing explicit mapping."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "Transactional semantics for UpsertContact and PersistImportSummary are not implemented (no transaction boundaries or atomic guarantees)."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "CheckImportIdempotency declares possible Conflict exception in spec, but implementation never throws it."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Response codes mostly match spec, but 422 (declared in spec) is not handled; 503 is introduced instead (not listed in spec)."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "Loop is implemented via recursion (FlowJoinProcessRow), which is logically correct but may risk stack overflow for large datasets and diverges from typical iterative semantics."
+      }
+    ],
+    "reasoning": "The implementation closely follows the control flow and action mapping from the specification, including correct handling of decisions, loop via FlowJoin recursion, and idempotency branching. Data propagation through context is consistent and aligns with inputs/outputs. However, retry semantics for LoadImportFile are not strictly compliant with the declared retryPolicy (missing explicit retryOn filtering and deterministic exhaustion behavior). Transactional guarantees are not implemented for repository actions marked as transactional. Additionally, HTTP contract deviates slightly (missing 422, adding 503). Overall, behavior is largely correct with some important deviations in error handling and infrastructure concerns."
+  },
+  "specification": {
+    "score": 0.94,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "InitializeImportCounters / loop processing",
+        "description": "No explicit pre/post conditions define how rowIndex evolves or guarantees about bounds, which may lead to ambiguity in loop implementation.",
+        "suggestedFix": "Add explicit postCondition such as 'rowIndex initialized to 0 and incremented until equal to totalRows'."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckImportIdempotency, UpsertContact",
+        "description": "Exceptions like Conflict are declared but no control flow (Decision or BackToDecision) specifies how they should be handled.",
+        "suggestedFix": "Define explicit exception handling paths (e.g., BackToDecision or error response mapping) for declared exceptions."
+      }
+    ]
+  }
+}

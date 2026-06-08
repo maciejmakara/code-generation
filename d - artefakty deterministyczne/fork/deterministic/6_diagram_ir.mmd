@@ -1,0 +1,80 @@
+flowchart TB
+  0mgmxTmGAqAKCQpg(("0mgmxTmGAqAKCQpg\<br/>uml:InitialNode"))
+  AnalyzeFailureReason["AnalyzeFailureReason\<br/>uml:CallBehaviorAction"]
+  AuthenticateRequest["AuthenticateRequest\<br/>uml:CallBehaviorAction"]
+  BuildCompletedResponse["BuildCompletedResponse\<br/>uml:CallBehaviorAction"]
+  BuildNewResponse["BuildNewResponse\<br/>uml:CallBehaviorAction"]
+  BuildRecoveryResponse["BuildRecoveryResponse\<br/>uml:CallBehaviorAction"]
+  BuildRestartedJobResponse["BuildRestartedJobResponse\<br/>uml:CallBehaviorAction"]
+  BuildRunningResponse["BuildRunningResponse\<br/>uml:CallBehaviorAction"]
+  BuildStatementResponse["BuildStatementResponse\<br/>uml:CallBehaviorAction"]
+  C0uBxTmGAqAKCQ6q((("C0uBxTmGAqAKCQ6q\<br/>uml:ActivityFinalNode")))
+  CheckJobProgress["CheckJobProgress\<br/>uml:CallBehaviorAction"]
+  ComputeStatementTotals["ComputeStatementTotals\<br/>uml:CallBehaviorAction"]
+  CreateNewStatementJob["CreateNewStatementJob\<br/>uml:CallBehaviorAction"]
+  CreateStatementJob["CreateStatementJob\<br/>uml:CallBehaviorAction"]
+  EvaluateStatementStatus["EvaluateStatementStatus\<br/>uml:CallBehaviorAction"]
+  FetchAccountProfile["FetchAccountProfile\<br/>uml:CallBehaviorAction"]
+  FlowJoinGenerateStatement{"FlowJoinGenerateStatement\<br/>uml:MergeNode"}
+  FlowJoinJobStalled{"FlowJoinJobStalled\<br/>uml:MergeNode"}
+  FlowJoinProfileResolved{"FlowJoinProfileResolved\<br/>uml:MergeNode"}
+  FlowJoinRetryableFailure{"FlowJoinRetryableFailure\<br/>uml:MergeNode"}
+  IyduxTmGAqAKCQ1h["IyduxTmGAqAKCQ1h\<br/>uml:JoinNode"]
+  LoadFeesAndRates["LoadFeesAndRates\<br/>uml:CallBehaviorAction"]
+  LoadFormattingPreferences["LoadFormattingPreferences\<br/>uml:CallBehaviorAction"]
+  LoadTransactions["LoadTransactions\<br/>uml:CallBehaviorAction"]
+  PublishStatementReady["PublishStatementReady\<br/>uml:CallBehaviorAction"]
+  RecoverFailedJob["RecoverFailedJob\<br/>uml:CallBehaviorAction"]
+  RenderStatementDocument["RenderStatementDocument\<br/>uml:CallBehaviorAction"]
+  RestartJob["RestartJob\<br/>uml:CallBehaviorAction"]
+  StoreStatement["StoreStatement\<br/>uml:CallBehaviorAction"]
+  UaauxTmGAqAKCQv1["UaauxTmGAqAKCQv1\<br/>uml:ForkNode"]
+  UseDefaultFormattingPreferences["UseDefaultFormattingPreferences\<br/>uml:CallBehaviorAction"]
+  ValidateStatementRequest["ValidateStatementRequest\<br/>uml:CallBehaviorAction"]
+  jobStalled{"jobStalled\<br/>uml:DecisionNode"}
+  profileAvailable{"profileAvailable\<br/>uml:DecisionNode"}
+  retryableFailure{"retryableFailure\<br/>uml:DecisionNode"}
+  statementStatus{"statementStatus\<br/>uml:DecisionNode"}
+  0mgmxTmGAqAKCQpg --> AuthenticateRequest
+  AuthenticateRequest --> ValidateStatementRequest
+  ValidateStatementRequest --> EvaluateStatementStatus
+  EvaluateStatementStatus --> statementStatus
+  statementStatus -- "COMPLETED" --> BuildCompletedResponse
+  statementStatus -- "RUNNING" --> CheckJobProgress
+  statementStatus -- "FAILED" --> AnalyzeFailureReason
+  statementStatus -- "NOT_FOUND" --> CreateStatementJob
+  BuildCompletedResponse --> FlowJoinGenerateStatement
+  FlowJoinGenerateStatement --> C0uBxTmGAqAKCQ6q
+  CheckJobProgress --> jobStalled
+  jobStalled -- "yes" --> RestartJob
+  jobStalled -- "no" --> BuildRunningResponse
+  RestartJob --> BuildRestartedJobResponse
+  BuildRestartedJobResponse --> FlowJoinJobStalled
+  FlowJoinJobStalled --> FlowJoinGenerateStatement
+  BuildRunningResponse --> FlowJoinJobStalled
+  AnalyzeFailureReason --> retryableFailure
+  retryableFailure -- "yes" --> RecoverFailedJob
+  retryableFailure -- "no" --> CreateNewStatementJob
+  RecoverFailedJob --> BuildRecoveryResponse
+  CreateNewStatementJob --> BuildNewResponse
+  FlowJoinRetryableFailure --> FlowJoinGenerateStatement
+  CreateStatementJob --> UaauxTmGAqAKCQv1
+  UaauxTmGAqAKCQv1 --> LoadTransactions
+  UaauxTmGAqAKCQv1 --> LoadFeesAndRates
+  UaauxTmGAqAKCQv1 --> FetchAccountProfile
+  LoadTransactions --> IyduxTmGAqAKCQ1h
+  LoadFeesAndRates --> IyduxTmGAqAKCQ1h
+  FetchAccountProfile --> profileAvailable
+  IyduxTmGAqAKCQ1h --> ComputeStatementTotals
+  ComputeStatementTotals --> RenderStatementDocument
+  RenderStatementDocument --> StoreStatement
+  StoreStatement --> PublishStatementReady
+  PublishStatementReady --> BuildStatementResponse
+  BuildRecoveryResponse --> FlowJoinRetryableFailure
+  BuildNewResponse --> FlowJoinRetryableFailure
+  profileAvailable -- "yes" --> LoadFormattingPreferences
+  profileAvailable -- "no" --> UseDefaultFormattingPreferences
+  LoadFormattingPreferences --> FlowJoinProfileResolved
+  UseDefaultFormattingPreferences --> FlowJoinProfileResolved
+  FlowJoinProfileResolved --> IyduxTmGAqAKCQ1h
+  BuildStatementResponse --> FlowJoinGenerateStatement

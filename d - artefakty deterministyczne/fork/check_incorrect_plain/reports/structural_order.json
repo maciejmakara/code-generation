@@ -1,0 +1,25 @@
+{
+  "violations": [],
+  "skipped_edges": [
+    {
+      "from": "UaauxTmGAqAKCQv1",
+      "to": "LoadFeesAndRates",
+      "reason": "node_not_found_in_code",
+      "from_found": true,
+      "to_found": false
+    },
+    {
+      "from": "LoadFeesAndRates",
+      "to": "IyduxTmGAqAKCQ1h",
+      "reason": "node_not_found_in_code",
+      "from_found": false,
+      "to_found": true
+    }
+  ],
+  "summary": {
+    "total_edges": 43,
+    "checked_edges": 41,
+    "violations_count": 0,
+    "skipped_edges_count": 2
+  }
+}

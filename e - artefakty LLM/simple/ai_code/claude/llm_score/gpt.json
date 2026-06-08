@@ -1,0 +1,108 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Additional behaviors not specified in the spec: audit logging (AuditLogger), JWT decoding fallback logic, and ownership pre-check accessing repository directly inside AuthorizeCustomer. These extend beyond the defined actions.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.87,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "AuthorizeCustomer accesses repository directly (_store.get) instead of relying on LoadSubscription output, creating duplicated data access and potential inconsistency with spec-defined flow."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "AuthorizeCustomer raises Unauthorized when subscription is missing instead of deferring to LoadSubscription which should raise NotFound per spec."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Response includes 503 and 500 which are not listed in responseError (400|401|403|404|409|422). Also 409 is declared but never produced."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "Decision(cancellable) 'no' branch is effectively unreachable because CheckCancellationEligibility throws UnprocessableEntity instead of returning cancellable=false."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "SecurityContext Role_Customer is not explicitly enforced beyond basic token presence and ownership check."
+      }
+    ],
+    "reasoning": "Overall flow is correctly implemented: actions are executed in order, decision branching is present, and side effects (cancel, publish, email) occur only in the 'yes' branch. Retry policy for email is correctly implemented with log_and_continue semantics. Transactional boundary is simulated appropriately in CancelSubscription. However, there are deviations: eligibility check uses exceptions instead of boolean flow, making the 'no' branch redundant; AuthorizeCustomer performs repository access prematurely; and HTTP contract slightly diverges (extra status codes, missing 409). These are minor but noticeable deviations."
+  },
+  "specification": {
+    "score": 0.81,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 0.5,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CheckCancellationEligibility vs Decision(cancellable)",
+        "description": "Action defines output 'cancellable: bool' but also declares exception UnprocessableEntity, making it unclear whether failure should be expressed via boolean or exception.",
+        "suggestedFix": "Clarify that the action either returns cancellable=false OR throws UnprocessableEntity, but not both. Prefer one consistent mechanism."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CancelSubscription",
+        "description": "PostCondition only specifies status == CANCELED but omits timestamp and reason persistence requirements.",
+        "suggestedFix": "Extend postCondition to include canceled_at != null and cancel_reason stored when provided."
+      },
+      {
+        "criterion": "action_semantics",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "AuthorizeCustomer",
+        "description": "Ownership verification requires subscription data, but LoadSubscription is a separate step. Order creates ambiguity about where subscription is sourced.",
+        "suggestedFix": "Either include subscription as input (from context) or reorder flow: LoadSubscription before AuthorizeCustomer."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishSubscriptionCanceled",
+        "description": "Exception EventBusUnavailable is declared but no retry or compensation strategy is defined.",
+        "suggestedFix": "Specify retry policy or clarify that exception propagates and aborts flow."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(cancellable)",
+        "description": "Decision depends on 'cancellable', but prior action may throw instead of setting it, making the 'no' branch unclear.",
+        "suggestedFix": "Ensure CheckCancellationEligibility always returns a boolean and does not throw, or remove Decision and rely on exception-based flow."
+      }
+    ]
+  }
+}

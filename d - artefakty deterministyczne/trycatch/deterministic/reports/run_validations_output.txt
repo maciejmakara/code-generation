@@ -1,0 +1,24 @@
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 1 --file diagram-parser\files\activity_parsed\1_activity_with_conditions.json
+VALID
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 2 --file diagram-parser\files\activity_parsed\2_activity_flow.json
+VALID
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 3 --file diagram-parser\files\activity_parsed\3_activity_with_steps.json
+VALID
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 4 --file diagram-parser\files\activity_parsed\4_activity_optimized.json
+VALID
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 5 --file diagram-parser\files\activity_parsed\5_diagram_ir.json
+VALID
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser\static_validator\structural.py
+Loading diagram...
+Reading code...
+Comparing...
+Checking decision branches...
+Validation report saved to C:\git_projects\new\partial-automate-code-generation\diagram-parser\reports\report_structural.json
+{'missing_actions': [], 'missing_decisions': [], 'extra_actions': [], 'unmatched_calls': [], 'missing_decision_branches': {}, 'summary': {'total_reference_actions': 7, 'total_reference_decisions': 1, 'found_calls': 10, 'missing_actions_count': 0, 'missing_decisions_count': 0, 'extra_actions_count': 0, 'missing_branches_count': 0}}
+All checks passed successfully!
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser\static_validator\full_structural.py
+Validation report saved to C:\git_projects\new\partial-automate-code-generation\diagram-parser\reports\report_full_structural.json
+All checks passed successfully!
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser\static_validator\structural_order.py
+Validation report saved to C:\git_projects\new\partial-automate-code-generation\diagram-parser\reports\structural_order.json
+ALL VALIDATIONS PASSED

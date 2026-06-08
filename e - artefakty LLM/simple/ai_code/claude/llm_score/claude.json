@@ -1,0 +1,131 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Several behaviors not present in the spec have been added: (1) AuditLogger called in authorize_customer and cancel_subscription — auditRequired is not set on any action in the spec; (2) authorize_customer performs a pre-fetch from _store to check ownership before LoadSubscription, introducing an extra repository read outside the defined flow; (3) with_retry applies linear back-off (backoff_ms * attempt) instead of fixed delay — the spec states backoffMs=300 with no multiplier; (4) _decode_jwt falls back to a hardcoded demo UUID on parse failure instead of raising Unauthorized.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.74,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "CheckCancellationEligibility raises UnprocessableEntity directly when subscription is already CANCELED or has an outstanding invoice, bypassing the Decision(cancellable) branch entirely. The spec models these cases via the 'no' branch and RejectCancellation, which is responsible for raising UnprocessableEntity. Raising inside the eligibility check short-circuits RejectCancellation and makes the 'no' branch unreachable for these inputs."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "PublishSubscriptionCanceled exceptions (EventBusUnavailable) propagate unhandled to the controller, which maps them to HTTP 503. The spec does not define any error response for EventBusUnavailable in the responseError list (400|401|403|404|409|422). The spec implies the event must be published successfully (postCondition: event_published) with no fallback, but returning 503 is an undocumented HTTP contract deviation."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "authorize_customer accesses _repo._store directly (private attribute) to perform an ownership check. The spec declares AuthorizeCustomer inputs as authToken (JWT, source=request) and subscriptionId (UUID, source=request) only — no repository access is specified at this step. This introduces an undeclared dependency on LoadSubscription's data source within the Security action."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "The retry decorator implements linear back-off: sleep = (backoffMs / 1000) * attempt. The spec specifies backoffMs=300 as a fixed value with no multiplier semantics. This deviates from spec intent, though severity is minor since the policy type is unspecified."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "_decode_jwt catches ValueError/AttributeError and returns a hardcoded fallback UUID instead of raising Unauthorized. This means a malformed or invalid JWT silently succeeds, violating the security postcondition of AuthorizeCustomer."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The controller catches a generic Exception and returns HTTP 500. The spec responseError list is 400|401|403|404|409|422. HTTP 500 and 503 are returned in practice but not declared in the spec, making the HTTP contract wider than specified."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "HTTP 409 is declared in responseError but no exception or branch in the implementation produces a 409 response. This declared error code is dead."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "auditRequired is not set on any spec action, yet AuditLogger is invoked in two places. While not a security defect, it is extra behavior that was not specified and could cause compliance confusion."
+      }
+    ],
+    "reasoning": "The implementation correctly maps all six spec actions to corresponding methods, honors the Decision(cancellable) branching structure, implements the FlowJoin as a no-op merge marker, and applies the retry policy with log_and_continue exhaustion for SendCancellationEmail. The transactional boundary in cancel_subscription and postCondition guards are present. However, two blocking issues reduce confidence significantly: first, CheckCancellationEligibility raises UnprocessableEntity instead of returning cancellable=false, making the 'no' branch and RejectCancellation unreachable; second, EventBusUnavailable propagates as HTTP 503 which is outside the declared HTTP contract. Several minor issues (JWT fallback, linear backoff, extra repository read in security step, dead 409 status) further reduce the score."
+  },
+  "specification": {
+    "score": 0.75,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "AuthorizeCustomer",
+        "description": "The action declares inputs as authToken and subscriptionId but does not specify how ownership verification is performed. It is ambiguous whether a repository lookup is required within this action or whether ownership is derived solely from JWT claims. This led the implementation to add an undeclared _store access.",
+        "suggestedFix": "Add explicit input: {name: 'subscription', type: 'Subscription', source: 'context'} if a repository lookup is expected, or clarify in desc that ownership is verified via JWT claims only (e.g., sub claim == subscriptionId.customerId)."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CheckCancellationEligibility",
+        "description": "The action declares exception UnprocessableEntity and output cancellable: bool, but does not clarify whether ineligibility should result in returning cancellable=false (driving the 'no' branch) or raising UnprocessableEntity directly. This ambiguity caused the implementation to raise rather than return false, making RejectCancellation unreachable.",
+        "suggestedFix": "Clarify in desc: 'Returns cancellable=false when subscription is ineligible; does not raise UnprocessableEntity directly — UnprocessableEntity is raised by RejectCancellation in the no branch.' Remove UnprocessableEntity from exceptions list of this action, or document precisely when it is raised vs when cancellable=false is returned."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckCancellationEligibility",
+        "description": "No preCondition is specified. The conditions under which cancellation is ineligible (e.g., status==CANCELED, outstanding invoice, billing cycle constraints) are mentioned in desc as a free-text enumeration but are not formalized as preConditions or structured rules.",
+        "suggestedFix": "Add preCondition: 'subscription.status != CANCELED AND !subscription.hasOutstandingInvoice' or enumerate eligibility rules as structured metadata so generators can implement them deterministically."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishSubscriptionCanceled",
+        "description": "EventBusUnavailable is declared as an exception but no error handling strategy is defined (no retryPolicy, no onRetryExhausted, no fallback). It is unclear whether the overall flow should fail, retry, or swallow the error. The responseError list does not include 503, yet the exception will propagate to HTTP if unhandled.",
+        "suggestedFix": "Add retryPolicy to PublishSubscriptionCanceled (e.g., maxAttempts=3, onRetryExhausted='raise') or add an explicit error handling note such as 'EventBusUnavailable propagates and aborts the flow with 503' and update responseError to include 503."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(cancellable)",
+        "description": "The decision branches are labeled 'yes' and 'no' corresponding to the boolean cancellable output, but it is not specified what value cancellable holds when CheckCancellationEligibility raises UnprocessableEntity. The interaction between the exception path and the decision is undefined.",
+        "suggestedFix": "Add a BackToDecision or explicit exception branch from CheckCancellationEligibility, or document that UnprocessableEntity from this action bypasses the decision and terminates with 422 directly. Alternatively, clarify that cancellable=false is always returned for ineligible cases and UnprocessableEntity is never raised here."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "REST DEFINITION responseError",
+        "description": "HTTP 409 is listed in responseError but no action in the flow declares a ConflictException or maps to 409. There is no branch or exception that would produce this status code.",
+        "suggestedFix": "Either remove 409 from responseError if it is not applicable, or add an action (e.g., a concurrency check) with a ConflictException that maps to 409."
+      }
+    ]
+  }
+}

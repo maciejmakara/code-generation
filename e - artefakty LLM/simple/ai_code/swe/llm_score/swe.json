@@ -1,0 +1,62 @@
+{
+  "structural": {
+    "score": 1.0,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": []
+  },
+  "semantic": {
+    "score": 0.85,
+    "issues": [
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Returns 500 for unexpected errors, but spec only allows 400|401|403|404|409|422"
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "EventBusUnavailable exception is caught and handled differently than other exceptions - returns 204 instead of error status"
+      }
+    ],
+    "reasoning": "The implementation correctly follows the specification structure and flow. All actions are implemented with proper data flow from request/context sources to targets. The decision logic correctly branches based on cancellable boolean. However, there are minor deviations: 1) The HTTP contract deviation where 500 errors are returned for unexpected exceptions not in the allowed error codes, and 2) EventBusUnavailable is handled as a best-effort operation (returning 204) while other exceptions return error codes, which may not align with expected error handling consistency."
+  },
+  "specification": {
+    "score": 0.875,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishSubscriptionCanceled action",
+        "description": "Post-condition 'event_published' is ambiguous - should specify what constitutes successful event publishing",
+        "suggestedFix": "Define clear success criteria for event publishing, e.g., 'event_published = true when event is successfully acknowledged by message bus'"
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "inconsistent",
+        "location": "SendCancellationEmail vs EventBusUnavailable handling",
+        "description": "Specification doesn't clearly define how EventBusUnavailable should be handled compared to other exceptions",
+        "suggestedFix": "Specify consistent error handling strategy for all exceptions, or clearly document which exceptions should be treated as best-effort vs blocking"
+      }
+    ]
+  }
+}

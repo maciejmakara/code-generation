@@ -1,0 +1,24 @@
+{
+  "$id": "https://example.com/schemas/3_activity_with_steps.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["activity", "steps"],
+  "properties": {
+    "activity": {"type": "string"},
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "action", "type"],
+        "properties": {
+          "step": {"type": "string"},
+          "action": {"type": "string"},
+          "type": {"type": "string"},
+          "stereotype": {"type": ["string", "null"]},
+          "comment": {"type": "string"},
+          "condition": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

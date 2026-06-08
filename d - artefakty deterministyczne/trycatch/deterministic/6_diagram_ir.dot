@@ -1,0 +1,29 @@
+digraph Activity {
+  rankdir=TB;
+  node [shape=box, fontname=Helvetica];
+  edge [fontname=Helvetica];
+  "SUoUltmGAqAArgfU" [label="SUoUltmGAqAArgfU\\numl:InitialNode", shape=circle];
+  "6ZAsltmGAqAArgkG" [label="6ZAsltmGAqAArgkG\\numl:ActivityFinalNode", shape=doublecircle];
+  "CheckEmailUniqueness" [label="CheckEmailUniqueness\\numl:CallBehaviorAction", shape=box];
+  "CreateUserAccount" [label="CreateUserAccount\\numl:CallBehaviorAction", shape=box];
+  "FilterDisposableEmailDomains" [label="FilterDisposableEmailDomains\\numl:CallBehaviorAction", shape=box];
+  "FinalizeRegistration" [label="FinalizeRegistration\\numl:CallBehaviorAction", shape=box];
+  "FlowJoinRegistration" [label="FlowJoinRegistration\\numl:MergeNode", shape=diamond];
+  "HandleRegistrationTimeout" [label="HandleRegistrationTimeout\\numl:CallBehaviorAction", shape=box];
+  "SendActivationEmail" [label="SendActivationEmail\\numl:CallBehaviorAction", shape=box];
+  "ValidateUserInput" [label="ValidateUserInput\\numl:CallBehaviorAction", shape=box];
+  "isTimeout" [label="isTimeout\\numl:MergeDecisionNode", shape=diamond];
+  "SUoUltmGAqAArgfU" -> "ValidateUserInput";
+  "ValidateUserInput" -> "CheckEmailUniqueness";
+  "CheckEmailUniqueness" -> "FilterDisposableEmailDomains";
+  "isTimeout" -> "CreateUserAccount" [label="okFilterDisposableEmailDomains"]; 
+  "isTimeout" -> "HandleRegistrationTimeout" [label="exception"]; 
+  "isTimeout" -> "SendActivationEmail" [label="okCreateUserAccount"]; 
+  "isTimeout" -> "FinalizeRegistration" [label="okSendActivationEmail"]; 
+  "CreateUserAccount" -> "isTimeout";
+  "HandleRegistrationTimeout" -> "FlowJoinRegistration";
+  "SendActivationEmail" -> "isTimeout";
+  "FinalizeRegistration" -> "FlowJoinRegistration";
+  "FlowJoinRegistration" -> "6ZAsltmGAqAArgkG";
+  "FilterDisposableEmailDomains" -> "isTimeout";
+}

@@ -1,0 +1,146 @@
+{
+  "structural": {
+    "score": 0.964,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Extra behavior beyond specification: (1) audit_log helper function defined but never called — spec declares auditRequired on no action explicitly, yet the helper introduces audit infrastructure not specified; (2) handle_request ASGI adapter and _smoke_test entry point are outside spec scope; (3) stub_profile construction (AccountProfile with holder_name='Unknown') in the 'no' branch of profileAvailable decision is an assumption not in spec — spec only says UseDefaultFormattingPreferences with no mention of a stub profile object; (4) UnprocessableEntityException guard for unrecognised statementStatus is extra defensive behavior; (5) http_status_for maps StorageUnavailableException and ProfileServiceUnavailableException to 502, which is not in the declared responseError contract (400|401|403|404|409|422)",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.76,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "ValidateStatementRequest declares exceptions BadRequest, Conflict, and NotFound. The spec implies Conflict should be raised when an idempotency key collision is detected. The implementation calls _lookup_idempotency_key and stores the result in existing_statement_id but never raises ConflictException regardless of the result. The Conflict exception path from ValidateStatementRequest is completely suppressed — the comment says 'caller handles Conflict vs 202 based on status' but EvaluateStatementStatus is what drives the branch, not the idempotency lookup result. This means a duplicate submission with an existing key would proceed to EvaluateStatementStatus rather than short-circuiting with 409."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "StorageUnavailableException and ProfileServiceUnavailableException are mapped to HTTP 502 in ERROR_STATUS_MAP, but the spec's responseError contract declares only 400|401|403|404|409|422. These exceptions would return an undeclared 502 status to callers, violating the HTTP contract."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "EventPublishFailedException declared on PublishStatementReady has no handler in the controller. The publish_statement_ready stub always returns True and never raises, but if it did raise EventPublishFailedException the error would propagate to handle_request and return 500, which is not in the declared error contract. There is no retry policy or swallow-and-continue behavior defined for this exception in the spec, but the lack of any structured handling is a semantic gap."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "LoadTransactions declares exceptions NotFound and DataCorruption. Neither is handled in branch_load_transactions or at the asyncio.gather level. A DataCorruptionException raised during the parallel fork would propagate out of gather and be caught by the top-level handle_request handler as a 422, but the not_found path that created the job would be left with an orphaned job record and no cleanup. The spec does not define compensation but the implementation provides no structured handling either."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "AnalyzeFailureReason declares exception AnalysisUnavailableException. The implementation raises it only if existing_statement_id is None, but it has no handler in the controller's failed branch. If the stub raised it for a real analysis failure, it would propagate as a 422 from handle_request, which is in the error contract but represents an unhandled case in the orchestration flow."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "blocking",
+        "description": "ValidateStatementRequest has sideEffects:true (records idempotency key) and CreateStatementJob, CreateNewStatementJob, RestartJob, RecoverFailedJob all have sideEffects:true. None of these are wrapped in transaction boundaries. The spec does not declare transactional:true on these actions, but sideEffects:true without any consistency guarantee means concurrent duplicate requests could create multiple jobs before the idempotency key is persisted."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "In branch_fetch_account_profile, ProfileServiceUnavailableException is caught and account_profile is set to None, correctly routing to the 'no' branch of Decision(profileAvailable). However the stub AccountProfile constructed in the 'no' branch (holder_name='Unknown') is not part of the spec — UseDefaultFormattingPreferences has no inputs in the spec, and the downstream RenderStatementDocument receives accountProfile as a context input that should have been populated by FetchAccountProfile. The spec does not define fallback behavior for accountProfile itself when the profile service is unavailable, only for formattingPreferences."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "EvaluateStatementStatus takes accountId from context and validatedStatement from context per spec. The implementation correctly passes ctx['accountId'] and ctx['validatedStatement']. However, ctx['accountId'] is set from validated_account_id returned by validate_statement_request, which simply echoes back the input UUID — the spec output shows accountId target:context from ValidateStatementRequest, so this is correct but the pass-through adds no value and could mask a mismatch if the service transformed the account ID."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "CheckJobProgress output is jobProgress:JobProgress target:context. The implementation stores it in ctx['jobProgress'] but then accesses job_progress.stalled directly from the local variable rather than ctx['jobProgress'].stalled. This is functionally equivalent but inconsistent with the context-driven data flow pattern used throughout the rest of the controller."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The endpoint is POST /accounts/{accountId}/statements. The implementation accepts account_id as a plain string parameter in generate_monthly_statement and converts it with UUID(account_id) inside the controller. A malformed UUID would raise a ValueError that is not caught and not mapped to 400 BadRequest — it would fall through to the generic 500 handler in handle_request."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "AuthenticateRequest correctly executes first. The audit_log helper is defined but never called anywhere in the flow. While auditRequired is not explicitly set on any action in this spec, the helper's existence without invocation is dead code that could mislead maintainers into thinking auditing is active."
+      }
+    ],
+    "reasoning": "The implementation correctly maps all 22 spec actions, all 4 decision points (statementStatus, jobStalled, retryableFailure, profileAvailable), all 8 branches, the Fork/Join parallel execution using asyncio.gather with three concurrent branches, and all flow join convergence points. The HTTP endpoint, 202 response, and request binding are correctly implemented. The main semantic deficiencies are: (1) Conflict exception from idempotency collision in ValidateStatementRequest is suppressed rather than raised, breaking the 409 contract path; (2) StorageUnavailable and ProfileServiceUnavailable exceptions map to 502 which is outside the declared error contract; (3) transaction boundaries are absent for sideEffect-bearing actions; (4) parallel branch exceptions (NotFound, DataCorruption from LoadTransactions) have no structured handling. These issues collectively represent minor-to-noticeable deviations that would impact correctness in production edge cases."
+  },
+  "specification": {
+    "score": 0.688,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.0,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "exception_handling",
+        "score": 0.0,
+        "defectType": "missing",
+        "location": "PublishStatementReady, LoadTransactions, AnalyzeFailureReason, ValidateStatementRequest Conflict path",
+        "description": "Multiple declared exceptions have no flow handling defined. PublishStatementReady declares EventPublishFailed with no BackToDecision, no retry policy, and no onRetryExhausted — it is entirely unhandled. LoadTransactions declares NotFound and DataCorruption with no error paths defined. AnalyzeFailureReason declares AnalysisUnavailable with no handler branch. ValidateStatementRequest declares Conflict but the flow proceeds directly to EvaluateStatementStatus with no Conflict short-circuit path defined — it is ambiguous whether Conflict from idempotency check should terminate early or feed into the status decision.",
+        "suggestedFix": "For each declared exception, add either: (a) a BackToDecision handler with a labeled branch, (b) a retryPolicy with defined onRetryExhausted behavior, or (c) explicit documentation that the exception propagates to the caller. For ValidateStatementRequest Conflict, add an explicit early-exit branch before EvaluateStatementStatus that returns 409 directly."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "UseDefaultFormattingPreferences, RenderStatementDocument when profileAvailable=no",
+        "description": "UseDefaultFormattingPreferences has no inputs defined (empty inputs list implied by missing field) but RenderStatementDocument requires accountProfile:AccountProfile as an input. When the profileAvailable=no branch is taken, accountProfile is never populated in context — the spec does not define what accountProfile should contain when the profile service is unavailable. This creates an unresolvable data dependency for RenderStatementDocument.",
+        "suggestedFix": "Either (a) add a CreateStubAccountProfile action in the 'no' branch of profileAvailable that produces a minimal AccountProfile, or (b) make accountProfile an Optional input to RenderStatementDocument with defined fallback behavior, or (c) remove accountProfile from RenderStatementDocument inputs and pass only formattingPreferences."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "EvaluateStatementStatus outputs, ValidateStatementRequest outputs",
+        "description": "EvaluateStatementStatus outputs statementStatus:StatementStatus but the StatementStatus type values (completed, running, failed, not_found) are not defined in the spec. The Decision(statementStatus) branch labels must exactly match the type's enum values but this is implicit. Additionally, ValidateStatementRequest outputs both existingStatementId:UUID? and accountId:UUID to context, but accountId is also a request input — it is ambiguous whether the output accountId is the same value or a validated/normalized version.",
+        "suggestedFix": "Define StatementStatus as an explicit enum type in the spec with values: COMPLETED, RUNNING, FAILED, NOT_FOUND. Clarify whether ValidateStatementRequest's accountId output is a pass-through or a DB-validated UUID."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CreateStatementJob, CreateNewStatementJob, RestartJob, RecoverFailedJob",
+        "description": "Actions with sideEffects:true that create or modify persistent job records lack postConditions describing the resulting state. CreateStatementJob has no postCondition (unlike LoadTransactions which has 'job_created'). CreateNewStatementJob, BuildNewResponse, and RestartJob have preConditions but CreateNewStatementJob lacks a postCondition. Without postConditions, it is ambiguous what state the system should be in after these mutations and whether downstream actions can rely on the job being persisted.",
+        "suggestedFix": "Add postCondition to CreateStatementJob (e.g. 'job_created_and_persisted'), CreateNewStatementJob (e.g. 'new_job_created_for_non_retryable_failure'), and ensure all sideEffect:true actions have both preCondition and postCondition."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "ValidateStatementRequest, CreateStatementJob, CreateNewStatementJob, RestartJob, RecoverFailedJob",
+        "description": "Five actions have sideEffects:true but none declare transactional:true or consistencyScope. ValidateStatementRequest records an idempotency key as a side effect — without a consistency scope, concurrent duplicate requests could both pass idempotency check before either records the key. The spec provides no guidance on whether these mutations should be atomic or eventually consistent.",
+        "suggestedFix": "Add consistencyScope:'local-transaction' and transactional:true to ValidateStatementRequest (idempotency key write), CreateStatementJob, CreateNewStatementJob, RestartJob, and RecoverFailedJob. Define whether idempotency key recording in ValidateStatementRequest uses optimistic locking or a unique constraint."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(jobStalled), Decision(retryableFailure)",
+        "description": "Decision(jobStalled) condition is not defined — the spec does not specify what makes a job 'stalled' (no heartbeat threshold, no timeout duration, no staleness criteria). The implementation had to assume 300 seconds. Similarly, Decision(retryableFailure) condition is not defined — the criteria for what makes a failure retryable vs non-retryable are absent from the spec.",
+        "suggestedFix": "Add condition metadata to Decision(jobStalled) defining the staleness threshold (e.g. 'last_heartbeat_ts > 5 minutes ago') and to Decision(retryableFailure) defining retryability criteria (e.g. 'failure root cause is in [TransientNetworkError, Timeout, 503]')."
+      }
+    ]
+  }
+}

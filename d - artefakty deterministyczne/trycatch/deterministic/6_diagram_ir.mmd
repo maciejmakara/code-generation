@@ -1,0 +1,25 @@
+flowchart TB
+  SUoUltmGAqAArgfU(("SUoUltmGAqAArgfU\<br/>uml:InitialNode"))
+  6ZAsltmGAqAArgkG((("6ZAsltmGAqAArgkG\<br/>uml:ActivityFinalNode")))
+  CheckEmailUniqueness["CheckEmailUniqueness\<br/>uml:CallBehaviorAction"]
+  CreateUserAccount["CreateUserAccount\<br/>uml:CallBehaviorAction"]
+  FilterDisposableEmailDomains["FilterDisposableEmailDomains\<br/>uml:CallBehaviorAction"]
+  FinalizeRegistration["FinalizeRegistration\<br/>uml:CallBehaviorAction"]
+  FlowJoinRegistration{"FlowJoinRegistration\<br/>uml:MergeNode"}
+  HandleRegistrationTimeout["HandleRegistrationTimeout\<br/>uml:CallBehaviorAction"]
+  SendActivationEmail["SendActivationEmail\<br/>uml:CallBehaviorAction"]
+  ValidateUserInput["ValidateUserInput\<br/>uml:CallBehaviorAction"]
+  isTimeout{"isTimeout\<br/>uml:MergeDecisionNode"}
+  SUoUltmGAqAArgfU --> ValidateUserInput
+  ValidateUserInput --> CheckEmailUniqueness
+  CheckEmailUniqueness --> FilterDisposableEmailDomains
+  isTimeout -- "okFilterDisposableEmailDomains" --> CreateUserAccount
+  isTimeout -- "exception" --> HandleRegistrationTimeout
+  isTimeout -- "okCreateUserAccount" --> SendActivationEmail
+  isTimeout -- "okSendActivationEmail" --> FinalizeRegistration
+  CreateUserAccount --> isTimeout
+  HandleRegistrationTimeout --> FlowJoinRegistration
+  SendActivationEmail --> isTimeout
+  FinalizeRegistration --> FlowJoinRegistration
+  FlowJoinRegistration --> 6ZAsltmGAqAArgkG
+  FilterDisposableEmailDomains --> isTimeout

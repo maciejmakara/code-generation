@@ -1,0 +1,19 @@
+scenario,file_id,model,score,has_good_spec,included_in_filtered,rationale,good_spec_note,source_path
+fork,1,Gpt,0.5,0,1,Model wykryl problem ale zastosowal ukryta synchronizacje. Nie stosujac sie do semantyki fork'a.,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\check_incorrect_semantic\1
+fork,1,Claude,0,0,1,"Model zauwazyl problem, ale zignorowal transactions calkowicie.",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\check_incorrect_semantic\1
+fork,2,Gpt,0.5,1,0,"Model nie anuluje pozostalych sciezek,, fail fast z a wyciekiem zadan","W tym przypadku nawet na podstawie dobrej specyfikacji kod jest w pelni niepoprawny, specyfikacja jest za slaba",C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\check_incorrect_semantic\2
+fork,2,Claude,0.5,1,0,"Model nie anuluje pozostalych sciezek,, fail fast z a wyciekiem zadan","W tym przypadku nawet na podstawie dobrej specyfikacji kod jest w pelni niepoprawny, specyfikacja jest za slaba",C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\check_incorrect_semantic\2
+loop,1,Gpt,1,0,1,Model rozwiazuje blad w sposob poprawny,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\check_incorrect_semantic\1
+loop,1,Claude,1,0,1,Model rozwiazuje blad w sposob poprawny,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\check_incorrect_semantic\1
+loop,2,Gpt,0,1,0,Model rzuca wyjatek i przerywa calosc,"W tym przypadku nawet na podstawie dobrej specyfikacji kod jest niepoprawny, specyfikacja jest za slaba",C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\check_incorrect_semantic\2
+loop,2,Claude,0,1,0,Model rzuca wyjatek i przerywa calosc,"W tym przypadku nawet na podstawie dobrej specyfikacji kod jest niepoprawny, specyfikacja jest za slaba",C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\check_incorrect_semantic\2
+simple,1,Gpt,0,0,1,"rzuca wyjatek, zwraca blad 422, przerywa flow",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\check_incorrect_semantic\1
+simple,1,Claude,0,0,1,"Rzuca wyjatek, zwraca blad 502, przerywa flow",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\check_incorrect_semantic\1
+simple,2,Gpt,0.5,0,1,"Nie zgłasza problemu, bierze z DB",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\check_incorrect_semantic\2
+simple,2,Claude,0.5,0,1,"# Assumption: The JWT subject (after ""Bearer "") encodes customer_id.
+bierze z DB mimo wszystko, jest swiadomy ale mimo to probuje zrobic dzialajacy kod
+Model nie zgłasza braku danych w specyfikacji, lecz wprowadza własne założenia dotyczące źródła danych, co prowadzi do niejawnej zmiany kontraktu między komponentami.",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\check_incorrect_semantic\2
+trycatch,1,Gpt,1,0,1,Kod jest poprawny,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\check_incorrect_semantic\1
+trycatch,1,Claude,1,0,1,"Poprawnie Optional, loguje None gdy timeout przed CreateUserAccount",,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\check_incorrect_semantic\1
+trycatch,2,Gpt,0.5,0,1,Timeout obsluzony poprawnie ale brak komentarza o sprzecznosci,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\check_incorrect_semantic\2
+trycatch,2,Claude,0.5,0,1,Timeout obsluzony poprawnie ale brak komentarza o sprzecznosci,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\check_incorrect_semantic\2

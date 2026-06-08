@@ -1,0 +1,100 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Additional behaviors not specified in the spec: transaction boundaries (CreateStatementJob, StoreStatement), audit/logging utilities, and generalized retry abstraction (retry_async) extend beyond explicit specification.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.92,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "RenderStatementDocument allows account_profile to be optional, whereas spec implies it should always be present (either real or default via formatting branch)."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "Retry logic introduces a generic RetryExhausted exception path not defined in spec; spec requires specific 'throw_ProfileServiceUnavailable' and 'throw_StorageUnavailable'."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "Transactional boundaries are added (CreateStatementJob, StoreStatement) without being specified; may alter intended consistency semantics."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "Parallel branches correctly implemented, but shared mutable context without synchronization could lead to race conditions (not addressed)."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Authorization header parsing assumes 'Bearer ' prefix without validation; could violate strict contract expectations."
+      }
+    ],
+    "reasoning": "The implementation closely follows the specification: all actions, decisions, and branches are mapped correctly; parallel execution via asyncio.gather matches Fork/Join semantics; retry policies for external calls are faithfully implemented with correct parameters and exhaustion behavior mapping to specified exceptions. Data flows through context align with spec definitions, and responses are built correctly per branch. Minor deviations include additional infrastructure (transactions, retry abstraction), slight relaxation of data contracts (optional account_profile), and introduction of non-specified exception paths. Overall, behavior is semantically consistent with negligible deviations."
+  },
+  "specification": {
+    "score": 0.81,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "RenderStatementDocument",
+        "description": "Input 'accountProfile' is required, but upstream logic allows fallback to default formatting without guaranteeing accountProfile presence.",
+        "suggestedFix": "Clarify whether accountProfile is optional or guarantee its presence via explicit default object in 'profileAvailable=no' branch."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "EvaluateStatementStatus and downstream decisions",
+        "description": "No explicit definition of how 'statementStatus' is derived or persisted; ambiguity in mapping to real system state.",
+        "suggestedFix": "Define explicit rules or data source for determining statement status and its lifecycle transitions."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "CreateStatementJob, StoreStatement",
+        "description": "Spec does not define transactional boundaries or consistency scopes for critical state-changing operations.",
+        "suggestedFix": "Add 'transactional' and 'consistencyScope' metadata for repository and external actions affecting persistent state."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "Multiple actions (e.g., LoadTransactions, PublishStatementReady)",
+        "description": "Exceptions are declared but no explicit flow (BackToDecision or termination behavior) is defined.",
+        "suggestedFix": "Define explicit exception flows using BackToDecision or termination semantics for each declared exception."
+      }
+    ]
+  }
+}

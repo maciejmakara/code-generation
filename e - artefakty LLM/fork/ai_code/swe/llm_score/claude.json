@@ -1,0 +1,121 @@
+{
+  "structural": {
+    "score": 0.871,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 0.5,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.857
+    },
+    "issues": [
+      {
+        "criterion": "S5",
+        "score": 0.5,
+        "finding": "The FetchAccountProfile parallel swimlane contains an internal Decision(profileAvailable) with two branches (LoadFormattingPreferences / UseDefaultFormattingPreferences) that must complete before Join. In the implementation, the profileAvailable decision and its branches are executed AFTER asyncio.gather() returns, i.e. sequentially outside the parallel task. The spec requires this decision and its FlowJoinProfileResolved convergence to be fully contained within the FetchAccountProfile swimlane before the Join barrier.",
+        "severity": "blocking"
+      },
+      {
+        "criterion": "S7",
+        "score": 0.857,
+        "finding": "return_exceptions=True is passed to asyncio.gather(), causing exceptions from parallel tasks (e.g. DataCorruption from LoadTransactions, ProfileServiceUnavailable from FetchAccountProfile) to be silently swallowed and replaced with empty defaults ([] or None). This is extra error-masking behavior not present in the spec. Additionally, FetchAccountProfile's retry policy (maxAttempts:2, backoffMs:400, retryOn:[Timeout,502,503], onRetryExhausted:throw_ProfileServiceUnavailable) and StoreStatement's retry policy (maxAttempts:3, backoffMs:500) are not implemented at all — the code delegates directly to the underlying service without any retry loop.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.62,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "FetchAccountProfile specifies retryPolicy {maxAttempts:2, backoffMs:400, retryOn:[Timeout,502,503], onRetryExhausted:throw_ProfileServiceUnavailable}. No retry logic exists in ExternalCallService.fetch_account_profile(). Instead, return_exceptions=True silently converts ProfileServiceUnavailable into None, violating onRetryExhausted:throw_ProfileServiceUnavailable."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "StoreStatement specifies retryPolicy {maxAttempts:3, backoffMs:500, retryOn:[Timeout,502,503,StorageUnavailable], onRetryExhausted:throw_StorageUnavailable}. No retry logic exists in ExternalCallService.store_statement(). The method calls storage once with no retry loop."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "asyncio.gather(return_exceptions=True) suppresses exceptions from LoadTransactions (DataCorruption, NotFound) and LoadFeesAndRates. The spec requires these exceptions to propagate. Swallowing them and substituting empty lists/None corrupts downstream ComputeStatementTotals silently."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "blocking",
+        "description": "Decision(profileAvailable) and its two branches (LoadFormattingPreferences / UseDefaultFormattingPreferences) plus FlowJoinProfileResolved must execute inside the FetchAccountProfile parallel swimlane before the Join barrier. In the code they execute after gather() completes, making them sequential rather than part of the parallel unit, and breaking the Join synchronisation semantics."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "Context.restarted_job_id is assigned as a dynamic attribute (context.restarted_job_id = ...) but is not declared in the Context dataclass. This is a data-flow integrity issue; the context object definition is incomplete relative to the spec outputs."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "No actions in the spec are marked transactional:true, so no transaction boundary is strictly required. However, CreateStatementJob and CreateNewStatementJob have sideEffects:true and no compensating rollback on subsequent failures (e.g. if StoreStatement exhausts retries after CreateStatementJob succeeded, the orphaned job record is never cleaned up). The spec does not define compensating actions, but this is a consistency gap worth noting."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The spec lists responseError: 400|401|403|404|409|422. The Flask error handler maps no exception to 422 Unprocessable Entity. The ValidationService could raise conditions that semantically map to 422 but are currently returned as 400."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "EventPublishFailed is caught in the controller's except block and re-raised, but the Flask endpoint's except clause has no handler for it — it falls through to the generic 500 handler. The spec lists it as a known exception that should be surfaced appropriately."
+      }
+    ],
+    "reasoning": "The implementation correctly covers all decision branches, parallel task initiation, and the overall sequential flow. The main semantic deficiencies are: (1) complete absence of retry policies for FetchAccountProfile and StoreStatement despite explicit retryPolicy metadata in the spec; (2) return_exceptions=True masking exceptions that the spec requires to propagate; (3) the profileAvailable decision being placed outside the parallel swimlane boundary. These three issues are sufficiently significant to place the score in the 0.50–0.69 range despite the overall structural completeness."
+  },
+  "specification": {
+    "score": 0.8125,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "LoadFeesAndRates()",
+        "description": "LoadFeesAndRates output lists feeSchedule and preliminaryCalculations but its inputs reference only validatedStatement with no explicit accountId input, while LoadTransactions and FetchAccountProfile both carry accountId. It is unclear whether fee loading is account-specific or purely period/format-based. A generator could omit accountId from the cache lookup incorrectly.",
+        "suggestedFix": "Add {\"name\": \"accountId\", \"type\": \"UUID\", \"source\": \"context\"} to LoadFeesAndRates inputs if the fee schedule is account-specific, or add a clarifying note that it is global/period-scoped."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "LoadFormattingPreferences() comment",
+        "description": "Both LoadFormattingPreferences and UseDefaultFormattingPreferences have inline comments using '#' (e.g. 'Extract formatting preferences from # account profile') with a mid-text '#' character that looks like an accidental line comment fragment. This could confuse parsers or code generators.",
+        "suggestedFix": "Remove the erroneous '#' characters from the desc strings: 'Extract formatting preferences from account profile' and 'Use system default formatting preferences when profile is unavailable'."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "CreateStatementJob(), CreateNewStatementJob()",
+        "description": "Neither CreateStatementJob nor CreateNewStatementJob declares a postCondition. Given that subsequent parallel tasks (LoadTransactions, LoadFeesAndRates, FetchAccountProfile) carry preCondition: 'job_created', the job creation actions should explicitly declare postCondition: 'job_created' to close the pre/post chain.",
+        "suggestedFix": "Add \"postCondition\": \"job_created\" to both CreateStatementJob and CreateNewStatementJob metadata."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishStatementReady()",
+        "description": "PublishStatementReady declares exceptions: [EventPublishFailed] and sideEffects:true, but specifies no retryPolicy and no explicit handling directive (raise, log_and_continue, etc.). It is ambiguous whether a publish failure should abort the request (losing the 202 already logically committed) or be tolerated. The absence of guidance leads to inconsistent implementations.",
+        "suggestedFix": "Add a retryPolicy or at minimum an onFailure directive such as \"onFailure\": \"log_and_continue\" or \"onFailure\": \"raise\" to clarify the expected behaviour when event publishing fails after successful storage."
+      }
+    ]
+  }
+}

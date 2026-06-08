@@ -1,0 +1,342 @@
+{
+  "activity": "Generate monthly statement",
+  "flow": [
+    {
+      "action": "0mgmxTmGAqAKCQpg",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /accounts/{accountId}/statements\nresponseSuccess = 202 Accepted\nresponseError = 400|401|403|404|409|422",
+      "next": [
+        "AuthenticateRequest"
+      ]
+    },
+    {
+      "action": "AuthenticateRequest",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Security",
+      "comment": "desc = Authenticate customer and validate JWT token. \ninputs = [ \n{\"name\":\"authToken\",\"type\":\"JWT\",\"source\":\"request\"} \n] \noutputs = [ \n{\"name\":\"customerId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \nexceptions = [\"Unauthorized\",\"Forbidden\"] \npreCondition = valid_jwt_format \npostCondition = customer_authenticated",
+      "next": [
+        "ValidateStatementRequest"
+      ]
+    },
+    {
+      "action": "ValidateStatementRequest",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate statement request parameters and check idempotency. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"request\"}, \n{\"name\":\"statementRequest\",\"type\":\"StatementRequest\",\"source\":\"request\"}, \n{\"name\":\"idempotencyKey\",\"type\":\"String\",\"source\":\"request\"}, \n{\"name\":\"customerId\",\"type\":\"UUID\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"target\":\"context\"}, \n{\"name\":\"existingStatementId\",\"type\":\"UUID?\",\"target\":\"context\"}, \n{\"name\":\"accountId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \nexceptions = [\"BadRequest\",\"Conflict\",\"NotFound\"] \npreCondition = customer_authenticated \npostCondition = request_validated_and_idempotency_checked \nsideEffects = true",
+      "next": [
+        "EvaluateStatementStatus"
+      ]
+    },
+    {
+      "action": "EvaluateStatementStatus",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Evaluate current statement status to determine processing path. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementStatus\",\"type\":\"StatementStatus\",\"target\":\"context\"}] \nexceptions = [\"Conflict\"]",
+      "next": [
+        "statementStatus"
+      ]
+    },
+    {
+      "action": "statementStatus",
+      "type": "uml:DecisionNode",
+      "branches": [
+        {
+          "condition": "COMPLETED",
+          "target": "BuildCompletedResponse"
+        },
+        {
+          "condition": "RUNNING",
+          "target": "CheckJobProgress"
+        },
+        {
+          "condition": "FAILED",
+          "target": "AnalyzeFailureReason"
+        },
+        {
+          "condition": "NOT_FOUND",
+          "target": "CreateStatementJob"
+        }
+      ]
+    },
+    {
+      "action": "BuildCompletedResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for existing completed statement. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\":\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "next": [
+        "FlowJoinGenerateStatement"
+      ]
+    },
+    {
+      "action": "FlowJoinGenerateStatement",
+      "type": "uml:MergeNode",
+      "next": [
+        "C0uBxTmGAqAKCQ6q"
+      ]
+    },
+    {
+      "action": "C0uBxTmGAqAKCQ6q",
+      "type": "uml:ActivityFinalNode",
+      "next": []
+    },
+    {
+      "action": "CheckJobProgress",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Check if running job is stalled or needs to be restarted. \ninputs = [ \n{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"jobProgress\",\"type\":\"JobProgress\",\"target\":\"context\"}] \nexceptions = [\"JobNotFound\"] \npreCondition = statement_status_running \npostCondition = job_progress_evaluated",
+      "next": [
+        "jobStalled"
+      ]
+    },
+    {
+      "action": "jobStalled",
+      "type": "uml:DecisionNode",
+      "branches": [
+        {
+          "condition": "yes",
+          "target": "RestartJob"
+        },
+        {
+          "condition": "no",
+          "target": "BuildRunningResponse"
+        }
+      ]
+    },
+    {
+      "action": "RestartJob",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Restart stalled job with monitoring. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ \n{\"name\":\"restartedJobId\",\"type\":\"UUID\",\"target\":\"context\"} \n] \npreCondition = job_stalled \npostCondition = job_restarted_and_monitored \nsideEffects = true",
+      "next": [
+        "BuildRestartedJobResponse"
+      ]
+    },
+    {
+      "action": "BuildRestartedJobResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for restarted job. \ninputs = [{\"name\":\"restartedJobId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\":\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "next": [
+        "FlowJoinJobStalled"
+      ]
+    },
+    {
+      "action": "FlowJoinJobStalled",
+      "type": "uml:MergeNode",
+      "next": [
+        "FlowJoinGenerateStatement"
+      ]
+    },
+    {
+      "action": "BuildRunningResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for still-running job. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"response\",\"type\": \n\"StatementAcceptedResponse\",\"target\":\"response\"}]",
+      "next": [
+        "FlowJoinJobStalled"
+      ]
+    },
+    {
+      "action": "AnalyzeFailureReason",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Analyze why previous statement generation failed. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [{\"name\":\"failureAnalysis\",\"type\":\"FailureAnalysis\",\"target\":\"context\"}] \nexceptions = [\"AnalysisUnavailable\"] \npreCondition = statement_status_failed \npostCondition = failure_root_cause_identified",
+      "next": [
+        "retryableFailure"
+      ]
+    },
+    {
+      "action": "retryableFailure",
+      "type": "uml:DecisionNode",
+      "branches": [
+        {
+          "condition": "yes",
+          "target": "RecoverFailedJob"
+        },
+        {
+          "condition": "no",
+          "target": "CreateNewStatementJob"
+        }
+      ]
+    },
+    {
+      "action": "RecoverFailedJob",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Recover failed job with checkpoint resume. \ninputs = [{\"name\":\"existingStatementId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ \n{\"name\":\"recoveryResult\",\"type\":\"RecoveryResult\",\"target\":\"context\"}, \n{\"name\":\"resumePoint\",\"type\":\"ResumePoint\",\"target\":\"context\"} \n] \npreCondition = retryable_failure_detected \npostCondition = job_recovery_initiated \nsideEffects = true",
+      "next": [
+        "BuildRecoveryResponse"
+      ]
+    },
+    {
+      "action": "BuildRecoveryResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for recovered job \ninputs = [{\"name\": \"recoveryResult\", \"type\": \"RecoveryResult\", \"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "next": [
+        "FlowJoinRetryableFailure"
+      ]
+    },
+    {
+      "action": "FlowJoinRetryableFailure",
+      "type": "uml:MergeNode",
+      "next": [
+        "FlowJoinGenerateStatement"
+      ]
+    },
+    {
+      "action": "CreateNewStatementJob",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Create new job for non-retryable failures. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}\n] \noutputs = [{\"name\":\"newStatementId\",\"type\":\"UUID\",\"target\":\"context\"}] \nsideEffects = true",
+      "next": [
+        "BuildNewResponse"
+      ]
+    },
+    {
+      "action": "BuildNewResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response for newly created job \ninputs = [{\"name\": \"newStatementId\", \"type\": \"UUID\",\"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "next": [
+        "FlowJoinRetryableFailure"
+      ]
+    },
+    {
+      "action": "CreateStatementJob",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Create statement generation job. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementId\",\"type\":\"UUID\",\"target\":\"context\"}] \nsideEffects = true",
+      "next": [
+        "UaauxTmGAqAKCQv1"
+      ]
+    },
+    {
+      "action": "UaauxTmGAqAKCQv1",
+      "type": "uml:ForkNode",
+      "next": [
+        "LoadTransactions",
+        "LoadFeesAndRates",
+        "FetchAccountProfile"
+      ]
+    },
+    {
+      "action": "LoadTransactions",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Load transactions for the account and period. \ninputs = [ \n{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}\n] \noutputs = [{\"name\":\"transactions\",\"type\":\"Transaction[]\",\"target\":\"context\"}] \nexceptions = [\"NotFound\",\"DataCorruption\"] \npreCondition = job_created \npostCondition = transaction_data_loaded",
+      "next": [
+        "IyduxTmGAqAKCQ1h"
+      ]
+    },
+    {
+      "action": "IyduxTmGAqAKCQ1h",
+      "type": "uml:JoinNode",
+      "next": [
+        "ComputeStatementTotals"
+      ]
+    },
+    {
+      "action": "ComputeStatementTotals",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "BusinessRule",
+      "comment": "desc = Compute totals using preliminary calculations and transaction data. \ninputs = [ {\"name\":\"transactions\",\"type\":\"Transaction[]\",\"source\":\"context\"}, \n{\"name\":\"feeSchedule\",\"type\":\"FeeSchedule\",\"source\":\"context\"}, \n{\"name\":\"preliminaryCalculations\",\"type\":\"CalculationResult[]\",\"source\":\"context\"}] \noutputs = [{\"name\":\"statementTotals\",\"type\":\"StatementTotals\",\"target\":\"context\"}]",
+      "next": [
+        "RenderStatementDocument"
+      ]
+    },
+    {
+      "action": "RenderStatementDocument",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Render document with formatting preferences and computed totals. \ninputs = [ \n{\"name\":\"accountProfile\",\"type\":\"AccountProfile\",\"source\":\"context\"}, \n{\"name\":\"formattingPreferences\",\"type\":\"FormattingPreferences\",\"source\":\"context\"}, \n{\"name\":\"transactions\",\"type\":\"Transaction[]\",\"source\":\"context\"}, \n{\"name\":\"statementTotals\",\"type\":\"StatementTotals\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"statementDocument\",\"type\":\"byte[]\",\"target\":\"context\"}]",
+      "next": [
+        "StoreStatement"
+      ]
+    },
+    {
+      "action": "StoreStatement",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Store document to object storage and update job status. \ninputs = [ \n{\"name\":\"statementId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"statementDocument\",\"type\":\"byte[]\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"downloadUrl\",\"type\":\"String\",\"target\":\"context\"}, \n{\"name\":\"jobStatus\",\"type\":\"String\",\"target\":\"context\"} \n] \nexceptions = [\"StorageUnavailable\"] \npreCondition = document_rendered \npostCondition = statement_stored_and_job_completed \nsideEffects = true \nretryPolicy = {\"maxAttempts\":3,\"backoffMs\":500,\"retryOn\":[\"Timeout\",\"502\",\"503\",\"StorageUnavailable\"],\"onRetryExhausted\": \"throw_StorageUnavailable\"}",
+      "next": [
+        "PublishStatementReady"
+      ]
+    },
+    {
+      "action": "PublishStatementReady",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Publisher",
+      "comment": "desc = Publish StatementReady domain event \ninputs = [ \n{\"name\":\"statementId\",\"type\":\"UUID\",\"source\":\"context\"}, \n{\"name\":\"downloadUrl\",\"type\":\"String\",\"source\":\"context\"} \n] \noutputs = [ \n{\"name\":\"eventPublished\",\"type\":\"bool\",\"target\":\"event\"} \n] \nexceptions = [\"EventPublishFailed\"] \nsideEffects = true",
+      "next": [
+        "BuildStatementResponse"
+      ]
+    },
+    {
+      "action": "BuildStatementResponse",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response with download URL \ninputs = [{\"name\": \"statementId\", \"type\": \"UUID\", \"source\": \"context\"},{\"name\": \"downloadUrl\", \"type\": \"String\", \"source\": \"context\"}] \noutputs = [{\"name\": \"response\", \"type\": \"StatementAcceptedResponse\",\"target\": \"response\"}]",
+      "next": [
+        "FlowJoinGenerateStatement"
+      ]
+    },
+    {
+      "action": "LoadFeesAndRates",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Cache",
+      "comment": "desc = Load fee schedule and FX rates from cache. \ninputs = [{\"name\":\"validatedStatement\",\"type\":\"ValidatedStatement\",\"source\":\"context\"}] \noutputs = [ {\"name\":\"feeSchedule\",\"type\":\"FeeSchedule\",\"target\":\"context\"}, \n{\"name\":\"preliminaryCalculations\",\"type\":\"CalculationResult[]\",\"target\":\"context\"} ]",
+      "next": [
+        "IyduxTmGAqAKCQ1h"
+      ]
+    },
+    {
+      "action": "FetchAccountProfile",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Fetch account holder profile and formatting preferences. \ninputs = [{\"name\":\"accountId\",\"type\":\"UUID\",\"source\":\"context\"}] \noutputs = [ {\"name\":\"accountProfile\",\"type\":\"AccountProfile\",\"target\":\"context\"} ] \nretryPolicy = {\"maxAttempts\":2,\"backoffMs\":400,\"retryOn\":[\"Timeout\",\"502\",\"503\"], \"onRetryExhausted\": \"throw_ProfileServiceUnavailable\"} \nexceptions = [\"ProfileServiceUnavailable\"] \npreCondition = job_created \npostCondition = account_profile_retrieved \nsideEffects = false",
+      "next": [
+        "profileAvailable"
+      ]
+    },
+    {
+      "action": "profileAvailable",
+      "type": "uml:DecisionNode",
+      "branches": [
+        {
+          "condition": "yes",
+          "target": "LoadFormattingPreferences"
+        },
+        {
+          "condition": "no",
+          "target": "UseDefaultFormattingPreferences"
+        }
+      ]
+    },
+    {
+      "action": "LoadFormattingPreferences",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Extract formatting preferences from # account profile \ninputs = [{\"name\": \"accountProfile\", \"type\": \"AccountProfile\",\"source\": \"context\"}]\noutputs = [{\"name\": \"formattingPreferences\",\"type\": \"FormattingPreferences\", \"target\": \"context\"}]",
+      "next": [
+        "FlowJoinProfileResolved"
+      ]
+    },
+    {
+      "action": "FlowJoinProfileResolved",
+      "type": "uml:MergeNode",
+      "next": [
+        "IyduxTmGAqAKCQ1h"
+      ]
+    },
+    {
+      "action": "UseDefaultFormattingPreferences",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Use system default formatting preferences # when profile is unavailable \noutputs = [{\"name\": \"formattingPreferences\",\"type\": \"FormattingPreferences\", \"target\": \"context\"}]",
+      "next": [
+        "FlowJoinProfileResolved"
+      ]
+    }
+  ]
+}

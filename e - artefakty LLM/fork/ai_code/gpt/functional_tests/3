@@ -1,0 +1,3 @@
+T3a - join waits for all: PASS
+T3b - default formatting with null profile: PASS
+T3c - store retry exhausted: PASS

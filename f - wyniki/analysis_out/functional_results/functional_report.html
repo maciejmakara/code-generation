@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Functional Results Analysis</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 24px; background: #fafafa; color: #1a1a1a; }
+    .panel { background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .grid { display: flex; gap: 16px; flex-wrap: wrap; }
+    .card { width: 220px; border: 1px solid #ececec; border-radius: 12px; padding: 16px; }
+    .bar { height: 12px; background: #ececec; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: linear-gradient(90deg, #d46d6d, #78b07a); }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e4e4e4; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f3f3f3; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Functional tests analysis</h1>
+    <p>Normal view = raw normal script results.</p>
+    <p>Strict-final view = normal results with only listed Strict tests overridden.</p>
+    <p>Total parsed rows: 68</p>
+  </div>
+  <div class="panel">
+    <h2>Scenario overview: normal</h2>
+    <div class="grid"><div class='card'><h3>fork</h3><p>11 / 11 passed</p><div class='bar'><span style='width:100%'></span></div><p>Pass rate: 100.0%</p></div><div class='card'><h3>loop</h3><p>7 / 8 passed</p><div class='bar'><span style='width:87%'></span></div><p>Pass rate: 87.5%</p></div><div class='card'><h3>simple</h3><p>8 / 8 passed</p><div class='bar'><span style='width:100%'></span></div><p>Pass rate: 100.0%</p></div><div class='card'><h3>trycatch</h3><p>7 / 7 passed</p><div class='bar'><span style='width:100%'></span></div><p>Pass rate: 100.0%</p></div></div>
+  </div>
+  <div class="panel">
+    <h2>Scenario overview: strict-final</h2>
+    <div class="grid"><div class='card'><h3>fork</h3><p>11 / 11 passed</p><div class='bar'><span style='width:100%'></span></div><p>Pass rate: 100.0%</p></div><div class='card'><h3>loop</h3><p>7 / 8 passed</p><div class='bar'><span style='width:87%'></span></div><p>Pass rate: 87.5%</p></div><div class='card'><h3>simple</h3><p>8 / 8 passed</p><div class='bar'><span style='width:100%'></span></div><p>Pass rate: 100.0%</p></div><div class='card'><h3>trycatch</h3><p>5 / 7 passed</p><div class='bar'><span style='width:71%'></span></div><p>Pass rate: 71.4%</p></div></div>
+  </div>
+  <div class="panel">
+    <h3>Heatmap: normal</h3><svg width="490" height="264" viewBox="0 0 490 264"><text x="165" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 1</text><text x="285" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 2</text><text x="405" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 3</text><text x="98" y="87" text-anchor="end" font-size="13" font-family="Segoe UI">fork</text><rect x="110" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="133" text-anchor="end" font-size="13" font-family="Segoe UI">loop</text><rect x="110" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(140, 176, 95)" stroke="#fff" /><text x="284" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">67% | T2b</text><rect x="350" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="179" text-anchor="end" font-size="13" font-family="Segoe UI">simple</text><rect x="110" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="225" text-anchor="end" font-size="13" font-family="Segoe UI">trycatch</text><rect x="110" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text></svg>
+  </div>
+  <div class="panel">
+    <h3>Heatmap: strict-final</h3><svg width="490" height="264" viewBox="0 0 490 264"><text x="165" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 1</text><text x="285" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 2</text><text x="405" y="24" text-anchor="middle" font-size="12" font-family="Segoe UI">file 3</text><text x="98" y="87" text-anchor="end" font-size="13" font-family="Segoe UI">fork</text><rect x="110" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="60" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="83" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="133" text-anchor="end" font-size="13" font-family="Segoe UI">loop</text><rect x="110" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(140, 176, 95)" stroke="#fff" /><text x="284" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">67% | T2b</text><rect x="350" y="106" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="129" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="179" text-anchor="end" font-size="13" font-family="Segoe UI">simple</text><rect x="110" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="152" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="404" y="175" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><text x="98" y="225" text-anchor="end" font-size="13" font-family="Segoe UI">trycatch</text><rect x="110" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="164" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="230" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(100, 220, 95)" stroke="#fff" /><text x="284" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">100%</text><rect x="350" y="198" width="108" height="36" rx="6" ry="6" fill="rgb(180, 133, 95)" stroke="#fff" /><text x="404" y="221" text-anchor="middle" font-size="11" font-family="Segoe UI">33% | T3b,T3c</text></svg>
+  </div>
+  <div class="panel">
+    <h2>Failures: normal</h2>
+    <table>
+      <thead><tr><th>Scenario</th><th>File</th><th>Test</th><th>Label</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody><tr><td>loop</td><td>2</td><td>T2b</td><td>all invalid:</td><td>FAIL</td><td>should persist 0 contacts. Expected=0, actual=1</td></tr></tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Failures: strict-final</h2>
+    <table>
+      <thead><tr><th>Scenario</th><th>File</th><th>Test</th><th>Label</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody><tr><td>loop</td><td>2</td><td>T2b</td><td>all invalid:</td><td>FAIL</td><td>should persist 0 contacts. Expected=0, actual=1</td></tr><tr><td>trycatch</td><td>3</td><td>T3b</td><td>DisposableEmailDetected before Decision:</td><td>FAIL</td><td>-</td></tr><tr><td>trycatch</td><td>3</td><td>T3c</td><td>ValidationException before Decision:</td><td>FAIL</td><td>-</td></tr></tbody>
+    </table>
+  </div>
+</body>
+</html>

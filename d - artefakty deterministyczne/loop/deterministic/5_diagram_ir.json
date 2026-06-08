@@ -1,0 +1,473 @@
+{
+  "activity": "Bulk import contacts",
+  "nodes": [
+    {
+      "id": "4Mmo8dmGAqAArgl0",
+      "action": "4Mmo8dmGAqAArgl0",
+      "type": "uml:InitialNode",
+      "semanticType": "uml:InitialNode",
+      "stereotype": null,
+      "comment": "endpoint = POST /contacts/import\nresponseSuccess = 202 Accepted\nresponseError = 400|401|403|409|422",
+      "in": 0,
+      "out": 1
+    },
+    {
+      "id": "4XDY8dmGAqAArgqC",
+      "action": "4XDY8dmGAqAArgqC",
+      "type": "uml:ActivityFinalNode",
+      "semanticType": "uml:ActivityFinalNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 0
+    },
+    {
+      "id": "TeBE8dmGAqAArgtm",
+      "action": "AddBatchDuplicateError",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Utility",
+      "comment": "desc = Record a batch-duplicate error for the row and continue the loop.\ninputs = [\n{\"name\":\"rowIndex\",\"type\":\"int\",\"source\":\"context\"},\n{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"importErrors\",\"type\":\"ImportError[]\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "nOz48dmGAqAArgsZ",
+      "action": "AddRowValidationError",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Utility",
+      "comment": "desc = Append row-level validation errors with a human-friendly message.\ninputs = [\n{\"name\":\"rowIndex\",\"type\":\"int\",\"source\":\"context\"},\n{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"importErrors\",\"type\":\"ImportError[]\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "hKWo8dmGAqAArgl8",
+      "action": "AuthorizeOperator",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Security",
+      "comment": "desc = Ensure the caller is an operator allowed to import contacts for a tenant.\ninputs = [\n{\"name\":\"authToken\",\"type\":\"JWT\",\"source\":\"request\"},\n{\"name\":\"tenantId\",\"type\":\"UUID\",\"source\":\"request\"}\n]\noutputs = [{\"name\":\"operatorId\",\"type\":\"UUID\",\"target\":\"context\"}]\nexceptions = [\"Unauthorized\",\"Forbidden\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "AF0U8dmGAqAArgxL",
+      "action": "BuildAcceptedResponse",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Build 202 response containing importId and a link to fetch results.\ninputs = [{\"name\":\"importId\",\"type\":\"UUID\",\"source\":\"context\"}]\noutputs = [{\"name\":\"response\",\"type\":\"ContactImportAcceptedResponse\",\"target\":\"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "KuSY8dmGAqAArgoN",
+      "action": "CheckImportIdempotency",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Ensure the idempotency key was not used before for this tenant to avoid duplicate imports.\ninputs = [\n{\"name\":\"tenantId\",\"type\":\"UUID\",\"source\":\"request\"},\n{\"name\":\"idempotencyKey\",\"type\":\"String\",\"source\":\"request\"}\n]\noutputs = [{\"name\":\"existingImportId\",\"type\":\"UUID?\",\"target\":\"context\"}]\nexceptions = [\"Conflict\"]\nsideEffects = true\nidempotent = true\nconsistencyScope = \"local-transaction\"",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "3hkE8dmGAqAArgtA",
+      "action": "FilterDuplicateInBatch",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Skip duplicates within the current batch using email and phone as keys.\ninputs = [\n{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"source\":\"context\"},\n{\"name\":\"rows\",\"type\":\"RawContactRow[]\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"notDuplicate\",\"type\":\"bool\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "x8348dmGAqAArgsw",
+      "action": "FlowJoinAfterRow",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "RItY8dmGAqAArgp6",
+      "action": "FlowJoinBulkImportContacts",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "235E8dmGAqAArgt4",
+      "action": "FlowJoinDuplicate",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "J58k8dmGAqAArgvW",
+      "action": "FlowJoinProcessRow",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "RBUs8dmGAqAArg5F",
+      "action": "IncrementRowIndex",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Utility",
+      "comment": "desc = Increment row index and continue processing remaining rows.\ninputs = [{\"name\":\"rowIndex\",\"type\":\"int\",\"source\":\"context\"}]\noutputs = [{\"name\":\"rowIndex\",\"type\":\"int\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "DVY48dmGAqAArgrE",
+      "action": "InitializeImportCounters",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Utility",
+      "comment": "desc = Initialize counters and an error collection for the import session.\ninputs = [{\"name\":\"totalRows\",\"type\":\"int\",\"source\":\"context\"}]\noutputs = [\n{\"name\":\"rowIndex\",\"type\":\"int\",\"target\":\"context\"},\n{\"name\":\"importErrors\",\"type\":\"ImportError[]\",\"target\":\"context\"}\n]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "AGnY8dmGAqAArgqk",
+      "action": "LoadImportFile",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Download import file from object storage and verify checksum.\ninputs = [{\"name\":\"validatedImport\",\"type\":\"ValidatedImport\",\"source\":\"context\"}]\noutputs = [{\"name\":\"fileBytes\",\"type\":\"byte[]\",\"target\":\"context\"}]\nretryPolicy = {\"maxAttempts\":3,\"backoffMs\":300,\"retryOn\":[\"Timeout\",\"502\",\"503\"],\"onRetryExhausted\": \"throw_StorageUnavailable\"}\nexceptions = [\"FileNotFound\",\"StorageUnavailable\"]\nsideEffects = false\nidempotent = true\nconsistencyScope = \"none\"",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "qI1E8dmGAqAArguG",
+      "action": "MapRowToContact",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Convert row into domain Contact object using tenant defaults.\ninputs = [\n{\"name\":\"tenantId\",\"type\":\"UUID\",\"source\":\"request\"},\n{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"contact\",\"type\":\"Contact\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "lHfY8dmGAqAArgq2",
+      "action": "ParseCsvRows",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Parse CSV into a list of raw contact rows, preserving row numbers for error reporting.\ninputs = [{\"name\":\"fileBytes\",\"type\":\"byte[]\",\"source\":\"context\"}]\noutputs = [\n{\"name\":\"rows\",\"type\":\"RawContactRow[]\",\"target\":\"context\"},\n{\"name\":\"totalRows\",\"type\":\"int\",\"target\":\"context\"}\n]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "3O3k8dmGAqAArgwz",
+      "action": "PersistImportSummary",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Persist import summary including counts and error list for later retrieval.\ninputs = [\n{\"name\":\"tenantId\",\"type\":\"UUID\",\"source\":\"request\"},\n{\"name\":\"importErrors\",\"type\":\"ImportError[]\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"importId\",\"type\":\"UUID\",\"target\":\"context\"}]\nsideEffects = true\nidempotent = false\nconsistencyScope = \"local-transaction\"\ntransactional = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "POQU8dmGAqAArgw9",
+      "action": "PublishImportCompleted",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Publisher",
+      "comment": "desc = Publish ContactImportCompleted with importId and number of processed rows.\ninputs = [\n{\"name\":\"importId\",\"type\":\"UUID\",\"source\":\"context\"},\n{\"name\":\"totalRows\",\"type\":\"int\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"eventPublished\",\"type\":\"bool\",\"target\":\"event\"}]\nsideEffects = true\nidempotent = true\nconsistencyScope = \"eventual\"",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "Poe48dmGAqAArgrm",
+      "action": "ReadNextRow",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Read current row and normalize values (trim, casing, locale). \ninputs = [ \n{\"name\":\"rows\",\"type\":\"RawContactRow[]\",\"source\":\"context\"}, \n{\"name\":\"rowIndex\",\"type\":\"int\",\"source\":\"context\"} \n] \noutputs = [{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "pexY8dmGAqAArgpj",
+      "action": "ReturnExistingImport",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Mapper",
+      "comment": "desc = Return existing import reference without processing the file again.\ninputs = [{\"name\":\"existingImportId\",\"type\":\"UUID\",\"source\":\"context\"}]\noutputs = [{\"name\":\"response\",\"type\":\"ContactImportAcceptedResponse\",\"target\":\"response\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "QlTE8dmGAqAArguY",
+      "action": "UpsertContact",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Upsert contact by email/phone and attach tags from import.\ninputs = [\n{\"name\":\"tenantId\",\"type\":\"UUID\",\"source\":\"request\"},\n{\"name\":\"contact\",\"type\":\"Contact\",\"source\":\"context\"}\n]\noutputs = [{\"name\":\"contactId\",\"type\":\"UUID\",\"target\":\"context\"}]\nexceptions = [\"Conflict\"]\nsideEffects = true\nidempotent = true\nconsistencyScope = \"local-transaction\"\ntransactional = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "WE0Y8dmGAqAArgnu",
+      "action": "ValidateImportRequest",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate import request includes file reference, format, and idempotency key.\ninputs = [\n{\"name\":\"importRequest\",\"type\":\"ContactImportRequest\",\"source\":\"request\"},\n{\"name\":\"idempotencyKey\",\"type\":\"String\",\"source\":\"request\"}\n]\noutputs = [{\"name\":\"validatedImport\",\"type\":\"ValidatedImport\",\"target\":\"context\"}]\nexceptions = [\"BadRequest\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "31F48dmGAqAArgr5",
+      "action": "ValidateRow",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate required fields (email/phone), formats, and maximum lengths for the row.\ninputs = [{\"name\":\"currentRow\",\"type\":\"RawContactRow\",\"source\":\"context\"}]\noutputs = [{\"name\":\"rowValid\",\"type\":\"bool\",\"target\":\"context\"}]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "Gs2Y8dmGAqAArgpR",
+      "action": "importAlreadyExists?",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "0CmE8dmGAqAArgtX",
+      "action": "notDuplicate?",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": ".p648dmGAqAArgrY",
+      "action": "rowIndexLessTotalRows?",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    },
+    {
+      "id": "Eet48dmGAqAArgsL",
+      "action": "rowValid?",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:DecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 2
+    }
+  ],
+  "edges": [
+    {
+      "from": "4Mmo8dmGAqAArgl0",
+      "to": "AuthorizeOperator",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "AuthorizeOperator",
+      "to": "ValidateImportRequest",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ValidateImportRequest",
+      "to": "CheckImportIdempotency",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CheckImportIdempotency",
+      "to": "importAlreadyExists?",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "importAlreadyExists?",
+      "to": "ReturnExistingImport",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "importAlreadyExists?",
+      "to": "LoadImportFile",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "ReturnExistingImport",
+      "to": "FlowJoinBulkImportContacts",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinBulkImportContacts",
+      "to": "4XDY8dmGAqAArgqC",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "LoadImportFile",
+      "to": "ParseCsvRows",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ParseCsvRows",
+      "to": "InitializeImportCounters",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "InitializeImportCounters",
+      "to": "FlowJoinProcessRow",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "rowIndexLessTotalRows?",
+      "to": "ReadNextRow",
+      "condition": "yes",
+      "kind": "next"
+    },
+    {
+      "from": "rowIndexLessTotalRows?",
+      "to": "PersistImportSummary",
+      "condition": "no",
+      "kind": "next"
+    },
+    {
+      "from": "ReadNextRow",
+      "to": "ValidateRow",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ValidateRow",
+      "to": "rowValid?",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "rowValid?",
+      "to": "AddRowValidationError",
+      "condition": "false",
+      "kind": "next"
+    },
+    {
+      "from": "rowValid?",
+      "to": "FilterDuplicateInBatch",
+      "condition": "true",
+      "kind": "next"
+    },
+    {
+      "from": "AddRowValidationError",
+      "to": "FlowJoinAfterRow",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinAfterRow",
+      "to": "IncrementRowIndex",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FilterDuplicateInBatch",
+      "to": "notDuplicate?",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "notDuplicate?",
+      "to": "AddBatchDuplicateError",
+      "condition": "false",
+      "kind": "next"
+    },
+    {
+      "from": "notDuplicate?",
+      "to": "MapRowToContact",
+      "condition": "true",
+      "kind": "next"
+    },
+    {
+      "from": "AddBatchDuplicateError",
+      "to": "FlowJoinDuplicate",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinDuplicate",
+      "to": "FlowJoinAfterRow",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "MapRowToContact",
+      "to": "UpsertContact",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "UpsertContact",
+      "to": "FlowJoinDuplicate",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinProcessRow",
+      "to": "rowIndexLessTotalRows?",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "PersistImportSummary",
+      "to": "PublishImportCompleted",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "PublishImportCompleted",
+      "to": "BuildAcceptedResponse",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "BuildAcceptedResponse",
+      "to": "FlowJoinBulkImportContacts",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "IncrementRowIndex",
+      "to": "FlowJoinProcessRow",
+      "condition": null,
+      "kind": "next"
+    }
+  ]
+}

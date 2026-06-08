@@ -1,0 +1,23 @@
+flowchart TB
+  9D.xSdmGAqAArgoH(("9D.xSdmGAqAArgoH\<br/>uml:InitialNode"))
+  AuthorizeCustomer["AuthorizeCustomer\<br/>uml:CallBehaviorAction"]
+  CancelSubscription["CancelSubscription\<br/>uml:CallBehaviorAction"]
+  CheckCancellationEligibility["CheckCancellationEligibility\<br/>uml:CallBehaviorAction"]
+  FlowJoinCancelSubscription{"FlowJoinCancelSubscription\<br/>uml:MergeNode"}
+  LoadSubscription["LoadSubscription\<br/>uml:CallBehaviorAction"]
+  PublishSubscriptionCanceled["PublishSubscriptionCanceled\<br/>uml:CallBehaviorAction"]
+  RejectCancellation["RejectCancellation\<br/>uml:CallBehaviorAction"]
+  SendCancellationEmail["SendCancellationEmail\<br/>uml:CallBehaviorAction"]
+  cancellable?{"cancellable?\<br/>uml:DecisionNode"}
+  q3rJSdmGAqAArgqw((("q3rJSdmGAqAArgqw\<br/>uml:ActivityFinalNode")))
+  9D.xSdmGAqAArgoH --> AuthorizeCustomer
+  AuthorizeCustomer --> LoadSubscription
+  LoadSubscription --> CheckCancellationEligibility
+  CheckCancellationEligibility --> cancellable?
+  cancellable? -- "yes" --> CancelSubscription
+  cancellable? -- "no" --> RejectCancellation
+  CancelSubscription --> PublishSubscriptionCanceled
+  RejectCancellation --> FlowJoinCancelSubscription
+  PublishSubscriptionCanceled --> SendCancellationEmail
+  SendCancellationEmail --> FlowJoinCancelSubscription
+  FlowJoinCancelSubscription --> q3rJSdmGAqAArgqw

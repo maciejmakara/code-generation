@@ -1,0 +1,6 @@
+T2a - timeout on CreateUserAccount branch: PASS
+T2b - timeout on SendActivationEmail branch: PASS
+
+Strict:
+T2a - timeout after CreateUserAccount: PASS
+T2b - timeout after SendActivationEmail: PASS

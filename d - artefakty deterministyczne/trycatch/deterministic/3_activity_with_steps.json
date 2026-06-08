@@ -1,0 +1,195 @@
+{
+  "activity": "User registration",
+  "steps": [
+    {
+      "step": "1a",
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504"
+    },
+    {
+      "step": "2a",
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]"
+    },
+    {
+      "step": "3a",
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none"
+    },
+    {
+      "step": "4a",
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high"
+    },
+    {
+      "step": "5a",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "6a",
+      "action": "CreateUserAccount",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Persist new user account with hashed credentials. \ninputs = [ {\"name\": \"validatedUserData\", \n\"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"target\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nsideEffects = true \nidempotent = false \nconsistencyScope = local-transaction \ntransactional = true \nauditRequired = true \nllmPriority = high",
+      "condition": "okFilterDisposableEmailDomains"
+    },
+    {
+      "step": "7a",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "8a",
+      "action": "loop to isTimeout",
+      "type": "Loop"
+    },
+    {
+      "step": "9b",
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504"
+    },
+    {
+      "step": "10b",
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]"
+    },
+    {
+      "step": "11b",
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none"
+    },
+    {
+      "step": "12b",
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high"
+    },
+    {
+      "step": "13b",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "14b",
+      "action": "HandleRegistrationTimeout",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ErrorHandler",
+      "comment": "desc = Handle timeout – log failure and return error response. \nCalled regardless of which action triggered timeout, userId may not be available. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID?\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"errorResponse\", \"type\": \"ErrorResponse\", \"target\": \"response\"} ] \npostCondition = registrationStatus_Failed",
+      "condition": "exception"
+    },
+    {
+      "step": "15b",
+      "action": "6ZAsltmGAqAArgkG",
+      "type": "uml:ActivityFinalNode"
+    },
+    {
+      "step": "16c",
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504"
+    },
+    {
+      "step": "17c",
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]"
+    },
+    {
+      "step": "18c",
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none"
+    },
+    {
+      "step": "19c",
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high"
+    },
+    {
+      "step": "20c",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "21c",
+      "action": "SendActivationEmail",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Send activation email with confirmation link. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailSentStatus\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nretryPolicy = {\"maxAttempts\": 3, \"backoffMs\": 300, \"retryOn\": [\"Timeout\", \"502\", \"503\"], \n\"onRetryExhausted\": \"raise\"}",
+      "condition": "okCreateUserAccount"
+    },
+    {
+      "step": "22c",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "23c",
+      "action": "loop to isTimeout",
+      "type": "Loop"
+    },
+    {
+      "step": "24d",
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504"
+    },
+    {
+      "step": "25d",
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]"
+    },
+    {
+      "step": "26d",
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none"
+    },
+    {
+      "step": "27d",
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high"
+    },
+    {
+      "step": "28d",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode"
+    },
+    {
+      "step": "29d",
+      "action": "FinalizeRegistration",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Mark registration as complete and set user status active. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"requestId\", \"type\": \"UUID\", \"target\": \"response\"} ] \npostCondition = userStatus_Active \nsideEffects = true \nidempotent = true \nconsistencyScope = local-transaction \ntransactional = true",
+      "condition": "okSendActivationEmail"
+    },
+    {
+      "step": "30d",
+      "action": "6ZAsltmGAqAArgkG",
+      "type": "uml:ActivityFinalNode"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+T3a - ConflictException before decision: PASS
+T3b - DisposableEmailDetected before decision: PASS
+T3c - ValidationException before decision: PASS
+
+Strict:
+T3b - DisposableEmailDetected before Decision: FAIL
+T3c - ValidationException before Decision: FAIL

@@ -1,0 +1,66 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Implementation includes additional infrastructure beyond spec: retry helper, audit helper, error status mapping, ASGI runner, smoke test entry point",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.88,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "ProfileAvailable decision uses None check instead of explicit boolean, but functionally equivalent"
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "FetchAccountProfile catches ProfileServiceUnavailableException and converts to None instead of propagating as per spec"
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Additional 502 status codes added for service unavailable exceptions beyond spec"
+      }
+    ],
+    "reasoning": "The implementation correctly follows the specification's control flow structure. All actions, decisions, branches, parallel execution, and termination points are implemented. The main semantic deviations are minor: exception handling in the profile fetch branch (catches and converts to None vs propagating), and additional HTTP status codes for service unavailability scenarios. The parallel execution uses asyncio.gather correctly, and all data flows between actions match the specification."
+  },
+  "specification": {
+    "score": 0.94,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 0.75,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 1.0,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "state_definitions",
+        "score": 0.75,
+        "defectType": "ambiguous",
+        "location": "FetchAccountProfile Decision(profileAvailable)",
+        "description": "Decision condition 'profileAvailable' is ambiguous - should be explicit boolean or object existence check",
+        "suggestedFix": "Clarify as 'accountProfile is not None' or 'profileRetrieved successfully'"
+      }
+    ]
+  }
+}

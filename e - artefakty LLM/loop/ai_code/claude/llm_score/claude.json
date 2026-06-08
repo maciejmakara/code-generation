@@ -1,0 +1,157 @@
+{
+  "structural": {
+    "score": 0.86,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Multiple behaviors added beyond the spec: (1) ParseCsvRows performs value normalization (trim, lowercase, locale handling) that is spec-defined as the responsibility of ReadNextRow, not ParseCsvRows; (2) load_import_file uses reraise=False in the tenacity decorator, which swallows the RetryError and then re-raises it as StorageUnavailableException via a separate catch — this works but adds non-spec retry plumbing complexity; (3) check_import_idempotency never raises ConflictException (declared in spec exceptions) — the Conflict path is silently dropped and only null-vs-present logic is used; (4) PublishImportCompleted failure is silently swallowed in the controller with a log — the spec declares no fallback for this action; (5) ValidateImportRequest enforces a 'csv only' format constraint that is not present in the spec.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.68,
+    "issues": [
+      {
+        "aspect": "control_flow",
+        "severity": "blocking",
+        "description": "The row-processing loop is implemented synchronously with a Python while loop in an async FastAPI endpoint handler. The spec defines no parallel constructs in the row loop, so concurrency is not required there, but the async endpoint blocks the event loop during CSV parsing, file download (synchronous httpx.Client), and the entire row iteration. The file download via synchronous httpx.Client inside an async route is a correctness defect in an async framework — it blocks the event loop and prevents other requests from being served."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "blocking",
+        "description": "ParseCsvRows applies normalization logic (trim, lowercase email, split tags) that the spec assigns exclusively to ReadNextRow ('Read current row and normalize values — trim, casing, locale'). ParseCsvRows in the spec only parses raw rows preserving original values. This means ReadNextRow receives already-normalized data and performs no real normalization, violating the single-responsibility data flow defined in the spec."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "UpsertContact raises ConflictException on upsert conflict per spec, and the controller catches it and returns HTTP 409. However, this aborts the entire import mid-loop rather than treating the conflict as a per-row error recorded in importErrors. The spec does not define any flow exit from the row loop on UpsertContact conflict — the Conflict exception is declared on the action but no BackToDecision or error-recording branch is defined, making the abort behavior an undeclared flow deviation."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "CheckImportIdempotency declares 'Conflict' in its exceptions list but the implementation never raises ConflictException. The method only sets existingImportId to the found value or None. The Conflict exception path from this action is entirely unimplemented, meaning any scenario the spec intended to terminate with 409 from the idempotency check is silently suppressed."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "The tenacity retry decorator on load_import_file uses reraise=False, which means on retry exhaustion tenacity raises RetryError (not the original exception). The code catches RetryError and re-raises as StorageUnavailableException, which matches onRetryExhausted=throw_StorageUnavailable. However, FileNotFoundException raised inside _fetch is not in the retry_if_exception_type tuple, so it would bubble through tenacity and hit the outer except Exception handler, incorrectly converting it to StorageUnavailableException — losing the FileNotFound distinction."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "PublishImportCompleted failure is silently swallowed in the controller with only a logger.error call. The spec declares no fallback or error handling strategy for this action, but swallowing the exception is an undeclared assumption that may hide critical failures. The spec's idempotent=true and consistencyScope=eventual do not imply silent discard."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "StorageUnavailableException is mapped to HTTP 503 in the controller. The spec responseError list is 400|401|403|409|422 — 503 is not a declared response code. This widens the HTTP contract beyond the spec."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "HTTP 422 is declared in responseError but no exception or flow path in the implementation produces a 422 response. FastAPI's built-in Pydantic validation may return 422 for malformed request bodies, but no application-level 422 is explicitly generated. The declared error code is not covered by application logic."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "PersistImportSummary registers the idempotency key in _idempotency_store as part of the same method body, creating a coupled side-effect not specified in the action metadata. The spec defines CheckImportIdempotency as the action responsible for idempotency key management. Writing the key during PersistImportSummary is an undeclared side-effect on a separate action's responsibility boundary."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "InitializeImportCounters receives totalRows as input per spec (source: context) but the implementation accesses ctx.total_rows directly rather than using the method parameter, which is correct in effect but inconsistent with the spec's explicit input declaration."
+      }
+    ],
+    "reasoning": "The implementation covers all 16 spec actions, both top-level decisions, the row-processing loop, all join nodes, and both terminal paths correctly. The idempotency yes/no branch, retry policy for LoadImportFile, and the FlowJoinDuplicate/FlowJoinAfterRow chain are correctly collapsed into the while loop with continue statements. However, four blocking issues significantly reduce the semantic score: (1) normalization responsibility is misplaced from ReadNextRow to ParseCsvRows, (2) synchronous httpx.Client blocks the async event loop, (3) UpsertContact conflict aborts the entire import flow rather than being handled per-row, and (4) CheckImportIdempotency's ConflictException is never raised. Several minor HTTP contract and exception-handling deviations further reduce confidence. The overall semantic correctness is noticeable but not fundamentally broken for the happy path."
+  },
+  "specification": {
+    "score": 0.625,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 0.5,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "ParseCsvRows vs ReadNextRow",
+        "description": "Both actions share overlapping responsibilities for row normalization. ParseCsvRows desc says 'preserving row numbers for error reporting' but ReadNextRow says 'normalize values (trim, casing, locale)'. It is ambiguous whether ParseCsvRows should store raw unchanged bytes as RawContactRow or apply partial normalization. This caused the implementation to apply all normalization in ParseCsvRows and leave ReadNextRow as a trivial array index read.",
+        "suggestedFix": "Add to ParseCsvRows output description: 'rows contain raw, un-normalized values exactly as read from CSV'. Add to ReadNextRow desc: 'copies rows[rowIndex] into currentRow AND applies normalization (trim whitespace, lowercase email, locale-aware casing for names)'. Explicitly separate the two concerns."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "FilterDuplicateInBatch",
+        "description": "The inputs declare rows: RawContactRow[] (source: context) but it is ambiguous whether 'rows' refers to the full batch or only already-processed rows. The filter compares the current row against all prior rows, but the spec does not specify the comparison window (full file vs. processed-so-far).",
+        "suggestedFix": "Add preCondition or desc clarification: 'Compares currentRow against rows[0..rowIndex-1] (previously processed rows only) using email and phone as deduplication keys.'"
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "UpsertContact",
+        "description": "UpsertContact declares transactional=true and exceptions=[Conflict] but has no postCondition and does not define when Conflict is raised versus when a silent upsert occurs. It is unclear whether Conflict means a concurrent write conflict (optimistic locking) or a business-level duplicate that cannot be merged.",
+        "suggestedFix": "Add postCondition: 'contact record exists in DB with contactId assigned' and clarify in desc: 'Conflict is raised only on concurrent write collision (optimistic lock failure); email/phone duplicates are resolved by update, not rejected.'"
+      },
+      {
+        "criterion": "action_semantics",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CheckImportIdempotency",
+        "description": "The action declares both sideEffects=true and exceptions=[Conflict] but the desc says 'Ensure the idempotency key was not used before'. It is ambiguous whether this action only reads (returning existingImportId or null) or also writes (registering the key as a lock). The Conflict exception is unexplained — when would it fire if existingImportId is simply returned for the 'yes' branch decision?",
+        "suggestedFix": "Clarify desc: 'Read the idempotency store for (tenantId, idempotencyKey). If found, set existingImportId to the stored importId. If a concurrent request races to register the same key simultaneously, raise Conflict (409).' Distinguish the already-exists case (existingImportId set, no exception) from the race-condition case (Conflict raised)."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "inconsistent",
+        "location": "PersistImportSummary and CheckImportIdempotency",
+        "description": "The idempotency key registration (sideEffects=true on CheckImportIdempotency) and the import summary persistence (PersistImportSummary, transactional=true) are separate actions. It is not specified whether the idempotency key should be written atomically with the import summary commit or before it. If PersistImportSummary fails after CheckImportIdempotency has registered the key, the key is permanently consumed for a failed import.",
+        "suggestedFix": "Add a note to PersistImportSummary: 'The idempotency key registration must be committed atomically within the same local-transaction as the import summary record to prevent key leakage on rollback.' Alternatively, move idempotency key write to PersistImportSummary's transaction boundary."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "UpsertContact / row-processing loop",
+        "description": "UpsertContact declares exceptions=[Conflict] but no error-handling branch, BackToDecision, or error-recording pattern is defined for this exception within the row loop. The spec does not indicate whether a per-row Conflict should abort the import, be recorded in importErrors and continue, or be retried.",
+        "suggestedFix": "Add a BackToDecision or explicit error branch after UpsertContact: either 'on Conflict: append ImportError for this row and FlowJoinAfterRow (continue loop)' or 'on Conflict: propagate and terminate import with 409'. Document the chosen behavior explicitly."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(importAlreadyExists)",
+        "description": "The decision condition 'importAlreadyExists' is derived from existingImportId being non-null, but this is not stated explicitly. The branch labels are 'yes'/'no' rather than 'existingImportId != null' / 'existingImportId == null', leaving the mapping implicit.",
+        "suggestedFix": "Rename branches to 'existingImportId != null' and 'existingImportId == null', or add a note to CheckImportIdempotency: 'Decision condition importAlreadyExists evaluates to true when existingImportId is not null.'"
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(rowIndexLessTotalRows)",
+        "description": "The loop condition is named 'rowIndexLessTotalRows' which implies rowIndex < totalRows, but the spec does not explicitly state the comparison operator or whether the index is 0-based or 1-based. When totalRows=0 (empty file), the loop should not execute, but this is not specified.",
+        "suggestedFix": "Add preCondition to FlowJoinProcessRow: 'Loop continues while rowIndex < totalRows (0-based index). When totalRows=0, the no branch is taken immediately.' Specify the index base in InitializeImportCounters (rowIndex starts at 0)."
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "violations": [],
+  "skipped_edges": [],
+  "summary": {
+    "total_edges": 43,
+    "checked_edges": 43,
+    "violations_count": 0,
+    "skipped_edges_count": 0
+  }
+}

@@ -1,0 +1,75 @@
+"Sygnatura czasowa","Lata doświadczenia","Główna rola zawodowa","Znajomość UML (diagramy aktywności)","Jaki procent kodu tworzonego przez Ciebie w pracy zawodowej jest generowany przy użyciu modeli językowych"," [Czy wszystkie istotne kroki procesu zostały odwzorowane w kodzie?]"," [Czy przepływ sterowania odpowiada diagramowi UML?]"," [Czy zachowano poprawną kolejność operacji i zależności między akcjami?]"," [Czy stereotypy oraz metadane zostały poprawnie odwzorowane w wygenerowanym kodzie? (AuthorizeCustomer, CancelSubscription, SendCancellationEmail)]"," [Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?]"," [Czy metakod ułatwia analizę zgodności?]","Komentarz do scenariusza S1 - uzasadnienie"," [Czy wszystkie istotne kroki procesu zostały odwzorowane w kodzie?]"," [Czy przepływ sterowania odpowiada diagramowi UML?]"," [Czy zachowano poprawną kolejność operacji i zależności między akcjami?]"," [Czy stereotypy oraz metadane zostały poprawnie odwzorowane w wygenerowanym kodzie? (CheckImportIdempotency, ValidateRow, UpsertContact)]"," [Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?]"," [Czy metakod ułatwia analizę zgodności?]","Komentarz do scenariusza S2 - uzasadnienie"," [Czy wszystkie istotne kroki procesu zostały odwzorowane w kodzie?]"," [Czy przepływ sterowania odpowiada diagramowi UML?]"," [Czy zachowano poprawną kolejność operacji i zależności między akcjami?]"," [Czy stereotypy oraz metadane zostały poprawnie odwzorowane w wygenerowanym kodzie? (FetchAccountProfile, ComputeStatementTotals, StoreStatement)]"," [Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?]"," [Czy metakod ułatwia analizę zgodności?]","Komentarz do scenariusza S3 - uzasadnienie"," [Czy wszystkie istotne kroki procesu zostały odwzorowane w kodzie?]"," [Czy przepływ sterowania odpowiada diagramowi UML?]"," [Czy zachowano poprawną kolejność operacji i zależności między akcjami?]"," [Czy stereotypy oraz metadane zostały poprawnie odwzorowane w wygenerowanym kodzie? (FilterDisposableEmailDomains, CreateUserAccount, HandleRegistrationTimeout)]"," [Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?]"," [Czy metakod ułatwia analizę zgodności?]","Komentarz do scenariusza S4 - uzasadnienie"," [Czy zastosowanie pośredniej specyfikacji w postaci metakodu pomaga ograniczyć utratę informacji pomiędzy diagramem UML a wygenerowanym kodem?]"," [Czy metaatrybuty (@meta) zwiększają możliwość kontrolowania sposobu generowania kodu przez LLM?]"," [Czy przedstawione podejście może usprawnić proces implementacji serwisów REST w praktyce projektowej?]"," [Czy metoda wydaje się możliwa do zastosowania w bardziej złożonych systemach?]","Największe zalety metody:","Największe ograniczenia metody:","Co zmieniłbyś/abyś w metodzie lub sposobie prezentacji specyfikacji? Inne uwagi:"
+"2026/04/29 8:46:58 PM EEST","3-6 lat","FullStack","Zaawansowana (ekspert)","51-75%","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","Zdecydowanie tak","1. Teoretycznie to  merge node powinien być po wykonaniu jednej ze ścieżki a nie jako osobne dwa wywołania w kodzie.
+2. AuthorizeCustomer LoadSubscription ma przekazywany RequestData - ok, kod miejscami jest nadmiarowy.
+5. Wydaje się tylko podzielić i osadzić w jakiejś strukturze projektu i jak najbardziej
+6. Tak dodatkowe parametry, metadane zdecydowanie ułatwiają porównywanie - szczególnie w języku python ;) 
+W dodatku Join jest pechowym użyciem skoro to ""MergeDecision""
+
+czasem llm wygenerował za dużo nieokreślonych wartości enumeracji.","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","1.Od razu bardziej podoba mi się impementacja metadanych z inputs i outputs w porównianiu do S1.
+2.Bad request troche nadmiarowo ale ok
+3.AddBatchDuplicateError - nadmiarowo przekazany import_errors, append - ok natomiast current_row jest nieużywany w metodzie.
+tak samo w AddRowValidationError
+4.sporo nadmiarowego kodu, który mógłby być komentarzem,
+6.brak formatowania metakodu jako dokumentacji - dobriazg, ale skoro o formatowaniu kodu mowa, to widać taki kompaktowy styl.
+
+ogólnie jest lepiej niż w S1, natomiast widać dużo nadmiarowych linijek, które trzebabyłoby usuwać zmieniać itd. a mógł być np. przykład validacji wiersza + magic numbers zamiast stałych.
+
+responses przy @app.post - brak anotacji ","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Częściowo","Raczej nie","Zdecydowanie tak","0. Inne komentarze:
+ctx- nazwa zmiennej?
+target: mylone context z response.
+Nie ma przykładu raise DataCorruption w LoadTransactions()
+Join(IyduxTmGAqAKCQ1h) jakieś uuid się wkradło w komentarzach.
+Komentarze LLM'a niskiej jakości, - po co pisać komenatrz flow, wywołania metody jak poniżej jest to samo - nieczytelne.
+Na minus brak sensownych komentarzy, oraz metadanych z metakody przy definicji metod.
+
+Sporo nadmiarowej logiki, wygenerowanej jako placeholder, i tak będzie trzeba ją usunąć i zastąpić dokładną implementacją. LLM zamiast skupić się na odzworowaniu poprawnie metadanych połowę wygenerowanej odpowiedzi poświęcił na nadmiarowe informacje, struktury i inne
+
+na minus wielki kontekst, efekty uboczne metod sprawiają, że trzeba wchodzić w implementację i sprawdzać co metoda zmienia w kontekście ctx.
+","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Tu jest dobrze zatem tylko dodatkowe uwagi / obserwacje.
+1. Jestem w stanie zaakceptować registrationDTO=request_body, ponieważ typ się zgadza. później zmienne się zgadzają w 100%
+2. komentarze docstring do metod z metadanymi - super.
+3.decision_state = ""okfilterdisposableemaildomains"" LLM zjadł duże litery, a w prawdzie to metakod zjadł...
+4. świetne odwzorowanie specyfikacji
+     create_result = registration_service.CreateUserAccount(
+              validatedUserData=context.validatedUserData
+          )
+          context.userId = create_result[""userId""]
+          context.email = create_result[""email""]
+jedyne takie chyba z wszystkich przykładów.
+5.Na koniec obszerna obsługa wyjątków ;)
+
+Subiektywne najlepsze odwzorowanie.","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Automatyzacja procesu, dobre odzwierciedlenie przepływu sterowania, oraz obiektów na diagramie. Szybka możliwość prototypowania. Dobre zawarcie komentarzy, metadanych opisujące typy, warunki, wyjątki itd. Widzę duży potencjał w dalszym rozwoju tego podejścia - LLM mógłby mieć kolejne zadania do podzielenia kodu, refactoringu, implementacji zgodnie z taskami, lub regułami biznesowymi.","Nadmiernie generowane szczegóły metod, struktur, wartości enumeracji, pewnie zależne od system prompt'a - ścieżka rozwoju: prompt engineering pod uzyskanie najlepszego efektu dla tego zadania.","Multimodalne LLM'y jaki VIT aby dodać kontekst graficzny - jeżeli w ogóle coś doda oprócz tego co jest w metakodzie. Jestem ciekaw jak by działało to z diagramami aktywności w ramach jednej wąskiej domeny i sesji pracy z LLM'em - LLM dostaje 4-5 metakodów i powinien wygenerować reużywalne bloki kodu dla wielu aktywności. (tutaj większość metod była użyta raz tylko na potrzeby implementacji aktywności)"
+"2026/05/13 11:31:53 PM EEST","3-6 lat","Backend","Podstawowa","25-50%","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","""Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?"" - brak interfejsu do łatwej podmiany bazy in-memory na baze produkcyjną, uproszczony mechanizm JWT, brak DI","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","""Czy wygenerowany kod przypomina kod możliwy do dalszego rozwoju produkcyjnego?"" - FilterService zawiera pole `seen_keys`, które może rodzić problemy przy wielowątkowej naturze serwisu","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","Wydaje sie, że `RegistrationService` robi za dużo, przydałoby sie to podzielić na wiele sub-serwisów. Reszta problemów bardzo podobna do tego co było we wcześniejszych przykładach ","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Diagram/metakod ma niemal 100% odwzorowanie w kodzie, separacja warstw wiedzy","Koszt synchronizacja każdego z elementów między sobą","parser weryfikujący, czy każde @meta.output[target=context] jednej akcji jest pokryte przez @meta.input[source=context] następnej; eliminowałoby ręczną analizę zależności między krokami"
+"2026/05/16 9:12:39 PM EEST","3-6 lat","Biznes/Automatyzacja procesów","Podstawowa","1-25%","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","znalazłem niepotrzebny moim zdaniem kod w propozycji wygenerowanej przez model FlowJoinCancelSubscription() - najprawdopodobniej model na siłę próbował odtworzyć flow z UML","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","-poprawnie zaimplementował instrukcje pomimo, że na przykład ValidateImportRequest ma exception BadRequest, a CheckImportIdempotency ma już Conflict - poprawnie rozpoznał który funkcja ma mieć jakie exception
+-wielokrotnie wybiegł poza specyfikację np do  ParseCsvRows() dodał logikę, której nie ma w specyfikacji "" if file_bytes is None:
+      raise BadRequest(""fileBytes is required"")"" jest to uzasadnione ale pokazuje, że model wybiega z kodem poza specyfikacje w celu poprawy jakości kodu","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","Raczej tak","-zmienna ctx mogłaby być nazwana precyzyjniej
+-LoadTransactions pominął wskazaną w specyfikacji implementacje DataCorruption
+-linia       #   Fork(UaauxTmGAqAKCQv1) model pozostawił artefakty narzędzia generującego kod","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","-decision_state powinien być enumem
+-status również powinien być enumem","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Odpowiednio zaprojektowany diagram pozwala skutecznie generować kod, wspierając efektywną realizację projektu przez zespół inżynierski.","W przypadku rozbudowanych serwisów diagram może stać się na tyle złożony, że jego dalsze utrzymanie i aktualizacja będą utrudnione.","Wygenerowany metakod mógłby zostać poddany automatycznemu formatowaniu, aby zwiększyć jego czytelność i ułatwić pracę inżynierom korzystającym z tej metody."
+"2026/05/17 6:46:38 PM EEST","> 6 lat","Backend","Średnio-zaawansowana","1-25%","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Raczej tak","Zdecydowanie tak","FlowJoinCancelSubscription formalnie odwzorowuje diagram, ale produkcyjnie jest zbędne.
+Kod jest miejscami przeinżynierowany (wiele klas, wiele wyjątków itp.). Dla tego endpointu mogłoby to być prostsze.
+Dla niedostępności event bus bardziej naturalne byłoby gdyby zwracane było 503 Service Unavailable.
+
+Kod jest bardzo wysokiej jakości pod względem zgodności z diagramem UML oraz pseudokodem. Implementacja nie jest jedynie prostym odwzorowaniem kroków procesu — zawiera również:
+
+-poprawną separację warstw,
+-obsługę wyjątków,
+-semantykę REST,
+-retry policy,
+-transakcyjność,
+-idempotencję,
+-mechanizmy domenowe,
+-mapowanie wyjątków na HTTP,
+-modelowanie kontekstu procesu.","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Raczej tak","Zdecydowanie tak","Kod wygląda bardzo „workflow-engine generated”. Dla jednego endpointu: ogromna liczba klas, duża liczba warstw, bardzo rozbudowany context (zwiększa koszt utrzymania). Niepotrzebne odwzorowanie merge nodes np: FlowJoinDuplicate() to w praktyce wrapper na IncrementRowIndex().
+Pętla while True z warunkiem exite w środku jest mniej czytelna niż while context.row_index < context.total_rows. (w tym przypadku generator chciał literalne odwzorować diagram)","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Raczej tak","Zdecydowanie tak","Zbyt literalne mapowanie diagramu. Kod jest ogromny jak na pojedynczy endpoint. ConditionChecker jest bardzo ciężki. FlowJoin helpers są sztuczne np: FlowJoinGenerateStatement(). Część wyjątków wygląda sztucznie.
+
+Pre/post conditions są realnie egzekwowane. Generator poradził sobie z równoległością, Fork/join został odwzorowany bardzo poprawnie.","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Zdecydowanie tak","Raczej tak","Zdecydowanie tak","Kod prezentuje:
+
+-wysoką zgodność z UML i pseudokodem
+-bardzo dobrą implementację REST,
+-poprawne modelowanie timeoutów,
+-dobrą separację odpowiedzialności.
+
+Generator poprawnie rozumie: powrót do decision node, re-entry workflow, timeout-driven branching, retry orchestration na poziomie diagramu.
+
+Kod momentami wygląda bardziej jak interpreter diagramu UML, niż na naturalny kod aplikacyjny (nadmierna literalność)","Raczej tak","Raczej tak","Raczej tak","Częściowo","Bardzo dobre odwzorowanie diagramów UML i metakodu.","Bardzo literalne mapowanie diagramu do kodu, mniejsza naturalność niż w ręcznie pisanym kodzie. Nadmierna ceremonialność. Zbyt duża liczba klasa, sztuczne wyjątki (Overengineering)","Zlikwidowałabym ograniczenia, które zostały wskazane powyżej. "

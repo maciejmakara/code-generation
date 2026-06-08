@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Diagram IR Schema",
+  "description": "Schema for the diagram intermediate representation",
+  "type": "object",
+  "required": ["activity", "nodes", "edges"],
+  "properties": {
+    "activity": {
+      "type": "string",
+      "description": "Name of the activity"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "action", "type", "semanticType", "in", "out"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the node"
+          },
+          "action": {
+            "type": "string",
+            "description": "Name or identifier of the action"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the node (e.g., uml:InitialNode, uml:CallBehaviorAction)",
+            "pattern": "^uml:\\w+$"
+          },
+          "semanticType": {
+            "type": "string",
+            "description": "Semantic type of the node (can include custom types like uml:MergeDecisionNode)",
+            "pattern": "^uml:\\w+$"
+          },
+          "stereotype": {
+            "anyOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ],
+            "description": "Optional stereotype of the node"
+          },
+          "comment": {
+            "anyOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ],
+            "description": "Optional comment or description"
+          },
+          "in": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of incoming edges"
+          },
+          "out": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of outgoing edges"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "kind"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node action/ID"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node action/ID"
+          },
+          "condition": {
+            "anyOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ],
+            "description": "Optional condition for the edge"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Type of the edge (e.g., 'next')",
+            "enum": ["next", "branch", "fork", "join"]
+          }
+        }
+      }
+    }
+  }
+}

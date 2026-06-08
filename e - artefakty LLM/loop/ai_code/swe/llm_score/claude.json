@@ -1,0 +1,128 @@
+{
+  "structural": {
+    "score": 0.893,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Extra behavior beyond specification: (1) health check endpoint GET /health not in spec; (2) checksum validation logic inside LoadImportFile mock (BadRequestException on mismatch) not specified in action metadata; (3) Pydantic @validator on ContactImportRequest enforcing CSV-only format is beyond spec scope which only says 'validate format'",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.72,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "LoadImportFile retry policy is not correctly implemented. The spec mandates retryOn: ['Timeout', '502', '503'] with onRetryExhausted: 'throw_StorageUnavailable'. The implementation catches all exceptions generically and only raises StorageUnavailableException on timeout string match. It does not distinguish 502/503 HTTP errors, does not skip retry for non-retryable exceptions (e.g. FileNotFoundException should not be retried), and the retry loop swallows non-timeout errors on attempts 0-1 before re-raising on attempt 2 without throwing StorageUnavailableException specifically on exhaustion for all retry-eligible errors."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "StorageUnavailableException (HTTP 503) is not mapped in the endpoint exception handler. The spec lists 400|401|403|409|422 as error responses but the handler returns 503 for StorageUnavailableException, which is outside the declared error contract. More critically, FileNotFoundException raised by LoadImportFile has no handler and would result in an unhandled 500."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "blocking",
+        "description": "UpsertContact is marked transactional:true with consistencyScope: local-transaction in the spec, but no transaction boundary is implemented. Each UpsertContact call in the row loop is executed as an independent operation with no begin/commit/rollback wrapping. Similarly, PersistImportSummary is transactional:true but has no transaction management."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "UpsertContact declares exception 'Conflict' in the spec. The implementation does not handle ConflictException from RepositoryService.upsert_contact inside the row loop. An unhandled Conflict during upsert would propagate up and abort the entire import rather than being handled per-row."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "The loop is implemented via recursive async calls (flow_join_process_row -> flow_join_after_row -> flow_join_process_row). For large CSV files this will cause deep Python call stack recursion and eventual RecursionError. The spec's loop pattern should be implemented as an iterative while loop to be semantically correct and safe."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "FilterDuplicateInBatch uses row_number-based indexing to find prior rows (i >= current_row.row_number - 1) but row_number starts at 2 (CSV row after header) while list index starts at 0. For row_number=2, the condition stops at i>=1, checking only index 0. This off-by-one means the duplicate check against prior batch rows is inconsistent and could miss or incorrectly skip rows."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "MapRowToContact receives tenantId from 'request' per spec (source: request), but the implementation passes context.tenant_id which was originally sourced from the X-Tenant-ID header and stored in context. While functionally equivalent, the spec source distinction is blurred."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The spec declares responseError includes 422, which FastAPI automatically generates for Pydantic validation errors. However, BadRequestException maps to 400 in the handler. There is no explicit handling distinguishing 400 (bad request) from 422 (unprocessable entity), and the spec lists both implicitly. The mapping is acceptable but not precise."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "AuthorizeOperator correctly executes first. However, the auditRequired field is not present in AuthorizeOperator metadata (not spec-mandated here), but CheckImportIdempotency and UpsertContact have sideEffects:true with no audit trail generation, which while not explicitly required by auditRequired flags, is a semantic gap for a security-sensitive bulk operation."
+      }
+    ],
+    "reasoning": "The implementation correctly maps all 17 spec actions, all 4 decisions, both branches of each decision, the row-processing loop (FlowJoin calling Decision), and all flow join convergence points. The HTTP endpoint is correctly POST /contacts/import returning 202. The idempotency check and short-circuit return path are properly implemented. The main semantic deficiencies are: (1) broken retry policy for LoadImportFile that does not correctly filter retryable exceptions or guarantee StorageUnavailableException on exhaustion, (2) missing transaction management for transactional:true actions, (3) unhandled ConflictException from UpsertContact within the loop, (4) missing FileNotFoundException handler at endpoint level, and (5) recursive loop implementation that is not stack-safe for large imports. These collectively represent noticeable-to-major deviations in production correctness."
+  },
+  "specification": {
+    "score": 0.75,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PersistImportSummary inputs",
+        "description": "PersistImportSummary input list only includes tenantId and importErrors, but the action description says 'persist import summary including counts'. The totalRows and per-status counts (imported, failed, duplicates) are not listed as inputs, yet are implied by 'counts'. This forces the generator to guess what counts to persist.",
+        "suggestedFix": "Add inputs: {name: 'totalRows', type: 'int', source: 'context'}, {name: 'successCount', type: 'int', source: 'context'} (or derive counts from importErrors length vs totalRows explicitly)."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "FilterDuplicateInBatch inputs",
+        "description": "FilterDuplicateInBatch takes rows: RawContactRow[] as input (the full batch) but it is unclear whether this means the full original rows list or a seen-keys accumulator. Using the full list requires O(n²) scanning per row and requires knowing the current position, which is not listed as an input. No 'seenKeys' or 'processedRows' context variable is specified.",
+        "suggestedFix": "Either add a 'seenKeys' Set input maintained across loop iterations (output from prior FilterDuplicateInBatch calls), or clarify that rows input is sliced to [0..rowIndex-1]. Add rowIndex as an explicit input."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "UpsertContact, PersistImportSummary",
+        "description": "preCondition and postCondition fields are absent for transactional actions UpsertContact and PersistImportSummary. Without these, the generator cannot know what invariants must hold before/after the transaction, making it impossible to validate correctness of transaction boundary placement.",
+        "suggestedFix": "Add preCondition (e.g. 'contact.email or contact.phone is non-null') and postCondition (e.g. 'contact exists in DB with contactId assigned') for UpsertContact. Add preCondition/postCondition for PersistImportSummary describing expected DB state."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "UpsertContact, PersistImportSummary, CheckImportIdempotency",
+        "description": "Three actions are marked transactional:true or consistencyScope:local-transaction but no transaction boundary grouping is defined. It is ambiguous whether each action runs in its own independent transaction or whether they participate in a shared transaction. UpsertContact is called in a loop — it is unclear if each upsert is its own transaction or if all upserts are batched into one transaction.",
+        "suggestedFix": "Add explicit transaction boundary annotations or a 'transactionGroup' field grouping related actions. Clarify whether UpsertContact uses row-level transactions (one per row) or a batch transaction wrapping the entire loop body."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "UpsertContact Conflict exception, LoadImportFile FileNotFound exception",
+        "description": "UpsertContact declares exception 'Conflict' but no flow path handles it — there is no BackToDecision or error-collection branch for a Conflict during upsert. Similarly, LoadImportFile declares 'FileNotFound' but the spec has no explicit handler branch for it (only StorageUnavailable from retryExhausted is handled implicitly). This leaves two exceptions with undefined flow behavior.",
+        "suggestedFix": "Add explicit handling: for UpsertContact Conflict, either add a BackToDecision or add it to importErrors collection with an error type. For FileNotFound from LoadImportFile, add a branch that returns a 4xx response (likely 422 or 400) with a descriptive error."
+      }
+    ]
+  }
+}

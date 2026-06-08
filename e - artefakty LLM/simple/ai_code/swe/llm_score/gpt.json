@@ -1,0 +1,92 @@
+{
+  "structural": {
+    "score": 0.93,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Implementation introduces additional behavior not specified: global try/catch mapping to HTTP errors, logging, simulated retry behavior details, and fallback handling for EventBusUnavailable (forcing 204). These are not explicitly defined in the spec.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.88,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "AuthorizeCustomer generates a random customerId instead of verifying ownership against the loaded subscription, which breaks the intended data consistency between authorization and repository data."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "EventBusUnavailable is swallowed and converted to success (204), but the specification does not define this behavior explicitly. This changes failure semantics of PublishSubscriptionCanceled."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "CancelSubscription is marked transactional in spec, but implementation only simulates transaction without clear boundary or rollback guarantees."
+      },
+      {
+        "aspect": "control_flow",
+        "severity": "minor",
+        "description": "If CheckCancellationEligibility throws UnprocessableEntity, flow bypasses Decision(no) branch and directly returns 422 via exception handler instead of executing RejectCancellation action as defined in the 'no' branch."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Controller returns 500 InternalServerError which is not listed in responseError set (400|401|403|404|409|422)."
+      }
+    ],
+    "reasoning": "Overall flow closely matches the specification: correct sequencing of actions, correct decision branching, proper retry policy for email, and correct success (204) and error handling mappings. However, there are deviations: (1) authorization does not truly validate ownership, (2) exception-driven flow replaces explicit 'no' branch behavior, (3) event publishing failure is silently tolerated without spec mandate, and (4) transactional guarantees are only simulated. These are noticeable but not fundamentally breaking deviations."
+  },
+  "specification": {
+    "score": 0.91,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 1.0,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckCancellationEligibility / Decision(cancellable)",
+        "description": "Spec does not clearly define whether exceptions from CheckCancellationEligibility should bypass Decision or be treated as 'no' branch.",
+        "suggestedFix": "Explicitly define that UnprocessableEntity either maps to Decision(no) or is handled separately outside the decision."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CancelSubscription + PublishSubscriptionCanceled + SendCancellationEmail",
+        "description": "Spec defines CancelSubscription as transactional but does not clarify whether subsequent actions (event publishing, email) are inside or outside the transaction boundary.",
+        "suggestedFix": "Explicitly define transaction scope and whether event publishing is part of the same transaction or eventual consistency pattern."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishSubscriptionCanceled and SendCancellationEmail",
+        "description": "Spec defines exceptions but does not specify how they affect overall flow (e.g., whether EventBusUnavailable should fail the request or be ignored).",
+        "suggestedFix": "Define explicit handling policy for each exception (propagate, retry, ignore, compensate)."
+      }
+    ]
+  }
+}

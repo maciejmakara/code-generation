@@ -1,0 +1,48 @@
+{
+  "$id": "https://example.com/schemas/2_activity_flow.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["activity", "flow"],
+  "properties": {
+    "activity": {"type": "string"},
+    "flow": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "type"],
+        "properties": {
+          "action": {"type": "string"},
+          "type": {"type": "string"},
+          "stereotype": {"type": ["string", "null"]},
+          "comment": {"type": "string"},
+          "next": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["target"],
+              "properties": {
+                "condition": {"type": ["string", "null"]},
+                "target": {"type": "string"}
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "type": {"const": "uml:DecisionNode"}
+          }
+        },
+        "then": {
+          "required": ["branches"]
+        },
+        "else": {
+          "required": ["next"]
+        }
+      }
+    }
+  }
+}

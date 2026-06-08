@@ -1,0 +1,12 @@
+GPT - 0.5
+Nie zgłasza problemu, bierze z DB
+
+Claude - 0.5
+  # Assumption: The JWT subject (after "Bearer ") encodes customer_id.
+
+
+bierze z DB mimo wszystko, jest swiadomy ale mimo to probuje zrobic dzialajacy kod
+
+Model nie zgłasza braku danych w specyfikacji, lecz wprowadza własne założenia dotyczące źródła danych, co prowadzi do niejawnej zmiany kontraktu między komponentami.
+
+

@@ -1,0 +1,22 @@
+REST DEFINITION   # @meta {"endpoint": "POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504"}
+
+function main_Userregistration():
+  ValidateUserInput()  # @meta {"stereotype": "Validation", "desc": "Validate registration DTO structure and required fields.", "inputs": [{"name": "registrationDTO", "type": "RegistrationDTO", "source": "request"}], "outputs": [{"name": "validatedUserData", "type": "ValidatedUserData", "target": "context"}], "exceptions": ["ValidationException"]}
+  CheckEmailUniqueness()  # @meta {"stereotype": "Repository", "desc": "Verify email address is not already registered.", "inputs": [{"name": "validatedUserData", "type": "ValidatedUserData", "source": "context"}], "exceptions": ["TimeoutException", "ConflictException"], "sideEffects": false, "idempotent": true, "consistencyScope": "none"}
+  FilterDisposableEmailDomains()  # @meta {"stereotype": "Filter", "desc": "Reject registrations from known disposable or temporary email domains using a maintained blocklist.", "inputs": [{"name": "validatedUserData", "type": "ValidatedUserData", "source": "context"}], "outputs": [{"name": "emailAllowed", "type": "bool", "target": "context"}], "exceptions": ["DisposableEmailDetected"], "auditRequired": true, "llmPriority": "high"}
+  Decision(isTimeout)
+  if okfilterdisposableemaildomains:
+    CreateUserAccount()  # @meta {"stereotype": "Repository", "desc": "Persist new user account with hashed credentials.", "inputs": [{"name": "validatedUserData", "type": "ValidatedUserData", "source": "context"}], "outputs": [{"name": "userId", "type": "UUID", "target": "context"}, {"name": "email", "type": "String", "target": "context"}], "exceptions": ["TimeoutException"], "sideEffects": true, "idempotent": false, "consistencyScope": "local-transaction", "transactional": true, "auditRequired": true, "llmPriority": "high"}
+    BackToDecision(isTimeout)(okcreateuseraccount)
+  if exception:
+    HandleRegistrationTimeout()  # @meta {"stereotype": "ErrorHandler", "desc": "Handle timeout – log failure and return error response.\nCalled regardless of which action triggered timeout, userId may not be available.", "inputs": [{"name": "userId", "type": "UUID?", "source": "context"}], "outputs": [{"name": "errorResponse", "type": "ErrorResponse", "target": "response"}], "postCondition": "registrationStatus_Failed"}
+    FlowJoinRegistration()
+  if okcreateuseraccount:
+    SendActivationEmail()  # @meta {"stereotype": "ExternalCall", "desc": "Send activation email with confirmation link.", "inputs": [{"name": "userId", "type": "UUID", "source": "context"}, {"name": "email", "type": "String", "source": "context"}], "outputs": [{"name": "emailSentStatus", "type": "bool", "target": "context"}], "exceptions": ["TimeoutException"], "retryPolicy": {"maxAttempts": 3, "backoffMs": 300, "retryOn": ["Timeout", "502", "503"], "onRetryExhausted": "raise"}}
+    BackToDecision(isTimeout)(oksendactivationemail)
+  if oksendactivationemail:
+    FinalizeRegistration()  # @meta {"stereotype": "Repository", "desc": "Mark registration as complete and set user status active.", "inputs": [{"name": "userId", "type": "UUID", "source": "context"}], "outputs": [{"name": "requestId", "type": "UUID", "target": "response"}], "postCondition": "userStatus_Active", "sideEffects": true, "idempotent": true, "consistencyScope": "local-transaction", "transactional": true}
+    FlowJoinRegistration()
+
+function FlowJoinRegistration():
+  end()

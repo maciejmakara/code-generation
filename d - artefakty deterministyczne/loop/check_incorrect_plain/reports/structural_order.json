@@ -1,0 +1,25 @@
+{
+  "violations": [],
+  "skipped_edges": [
+    {
+      "from": "PersistImportSummary",
+      "to": "PublishImportCompleted",
+      "reason": "node_not_found_in_code",
+      "from_found": true,
+      "to_found": false
+    },
+    {
+      "from": "PublishImportCompleted",
+      "to": "BuildAcceptedResponse",
+      "reason": "node_not_found_in_code",
+      "from_found": false,
+      "to_found": true
+    }
+  ],
+  "summary": {
+    "total_edges": 31,
+    "checked_edges": 29,
+    "violations_count": 0,
+    "skipped_edges_count": 2
+  }
+}

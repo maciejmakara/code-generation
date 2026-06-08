@@ -1,0 +1,18 @@
+{
+  "missing_actions": [
+    "LoadFeesAndRates"
+  ],
+  "missing_decisions": [],
+  "extra_actions": [],
+  "unmatched_calls": [],
+  "missing_decision_branches": {},
+  "summary": {
+    "total_reference_actions": 24,
+    "total_reference_decisions": 4,
+    "found_calls": 34,
+    "missing_actions_count": 1,
+    "missing_decisions_count": 0,
+    "extra_actions_count": 0,
+    "missing_branches_count": 0
+  }
+}

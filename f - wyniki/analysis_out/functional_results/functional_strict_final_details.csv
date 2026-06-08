@@ -1,0 +1,35 @@
+scenario,file_id,view,test_id,label,status,passed,detail,source_path
+fork,1,strict_final,T1a,not_found profile available:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\1
+fork,1,strict_final,T1b,not_found default formatting:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\1
+fork,1,strict_final,T1c,not_found data corruption:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\1
+fork,2,strict_final,T2a,completed:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\2
+fork,2,strict_final,T2b,running not stalled:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\2
+fork,2,strict_final,T2c,running stalled:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\2
+fork,2,strict_final,T2d,failed retryable:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\2
+fork,2,strict_final,T2e,failed non retryable:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\2
+fork,3,strict_final,T3a,join waits for all:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\3
+fork,3,strict_final,T3b,default formatting with null profile:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\3
+fork,3,strict_final,T3c,store retry exhausted:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\fork\ai_code\gpt\functional_tests\3
+loop,1,strict_final,T1a,success 3 valid rows:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\1
+loop,1,strict_final,T1b,success 1 valid row:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\1
+loop,1,strict_final,T1c,idempotent repeat:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\1
+loop,2,strict_final,T2a,mixed content:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\2
+loop,2,strict_final,T2b,all invalid:,FAIL,0,"should persist 0 contacts. Expected=0, actual=1",C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\2
+loop,2,strict_final,T2c,duplicate in batch:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\2
+loop,3,strict_final,T3a,empty CSV:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\3
+loop,3,strict_final,T3b,storage unavailable:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\loop\ai_code\gpt\functional_tests\3
+simple,1,strict_final,T1a,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\1
+simple,1,strict_final,T1b,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\1
+simple,2,strict_final,T2a,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\2
+simple,2,strict_final,T2b,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\2
+simple,2,strict_final,T2c,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\2
+simple,3,strict_final,T3a,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\3
+simple,3,strict_final,T3b,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\3
+simple,3,strict_final,T3c,,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\simple\ai_code\gpt\functional_tests\3
+trycatch,1,strict_final,T1a,okFilterDisposableEmailDomains success path:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\1
+trycatch,1,strict_final,T1b,okCreateUserAccount after email retry:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\1
+trycatch,2,strict_final,T2a,timeout after CreateUserAccount:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\2
+trycatch,2,strict_final,T2b,timeout after SendActivationEmail:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\2
+trycatch,3,strict_final,T3a,ConflictException before decision:,PASS,1,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\3
+trycatch,3,strict_final,T3b,DisposableEmailDetected before Decision:,FAIL,0,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\3
+trycatch,3,strict_final,T3c,ValidationException before Decision:,FAIL,0,,C:\git_projects\new\partial-automate-code-generation\final_tests\artrifacts\trycatch\ai_code\gpt\functional_tests\3

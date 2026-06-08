@@ -1,0 +1,34 @@
+{
+  "$id": "https://example.com/schemas/1_activity_with_conditions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["activity", "nodes"],
+  "properties": {
+    "activity": {"type": "string"},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type", "next"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {"type": "string"},
+          "stereotype": {"type": ["string", "null"]},
+          "comment": {"type": "string"},
+          "next": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["target"],
+              "properties": {
+                "condition": {"type": ["string", "null"]},
+                "target": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

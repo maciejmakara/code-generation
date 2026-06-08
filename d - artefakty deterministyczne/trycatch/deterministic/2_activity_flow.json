@@ -1,0 +1,110 @@
+{
+  "activity": "User registration",
+  "flow": [
+    {
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504",
+      "next": [
+        "ValidateUserInput"
+      ]
+    },
+    {
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]",
+      "next": [
+        "CheckEmailUniqueness"
+      ]
+    },
+    {
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none",
+      "next": [
+        "FilterDisposableEmailDomains"
+      ]
+    },
+    {
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high",
+      "next": [
+        "isTimeout"
+      ]
+    },
+    {
+      "action": "isTimeout",
+      "type": "uml:DecisionNode",
+      "branches": [
+        {
+          "condition": "okFilterDisposableEmailDomains",
+          "target": "CreateUserAccount"
+        },
+        {
+          "condition": "exception",
+          "target": "HandleRegistrationTimeout"
+        },
+        {
+          "condition": "okCreateUserAccount",
+          "target": "SendActivationEmail"
+        },
+        {
+          "condition": "okSendActivationEmail",
+          "target": "FinalizeRegistration"
+        }
+      ]
+    },
+    {
+      "action": "CreateUserAccount",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Persist new user account with hashed credentials. \ninputs = [ {\"name\": \"validatedUserData\", \n\"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"target\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nsideEffects = true \nidempotent = false \nconsistencyScope = local-transaction \ntransactional = true \nauditRequired = true \nllmPriority = high",
+      "next": [
+        "isTimeout"
+      ]
+    },
+    {
+      "action": "HandleRegistrationTimeout",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ErrorHandler",
+      "comment": "desc = Handle timeout – log failure and return error response. \nCalled regardless of which action triggered timeout, userId may not be available. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID?\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"errorResponse\", \"type\": \"ErrorResponse\", \"target\": \"response\"} ] \npostCondition = registrationStatus_Failed",
+      "next": [
+        "FlowJoinRegistration"
+      ]
+    },
+    {
+      "action": "FlowJoinRegistration",
+      "type": "uml:MergeNode",
+      "next": [
+        "6ZAsltmGAqAArgkG"
+      ]
+    },
+    {
+      "action": "6ZAsltmGAqAArgkG",
+      "type": "uml:ActivityFinalNode",
+      "next": []
+    },
+    {
+      "action": "SendActivationEmail",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Send activation email with confirmation link. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailSentStatus\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nretryPolicy = {\"maxAttempts\": 3, \"backoffMs\": 300, \"retryOn\": [\"Timeout\", \"502\", \"503\"], \n\"onRetryExhausted\": \"raise\"}",
+      "next": [
+        "isTimeout"
+      ]
+    },
+    {
+      "action": "FinalizeRegistration",
+      "type": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Mark registration as complete and set user status active. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"requestId\", \"type\": \"UUID\", \"target\": \"response\"} ] \npostCondition = userStatus_Active \nsideEffects = true \nidempotent = true \nconsistencyScope = local-transaction \ntransactional = true",
+      "next": [
+        "FlowJoinRegistration"
+      ]
+    }
+  ]
+}

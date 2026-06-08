@@ -1,0 +1,115 @@
+{
+  "structural": {
+    "score": 0.86,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.0
+    },
+    "issues": [
+      {
+        "criterion": "S7",
+        "score": 0.0,
+        "finding": "The controller adds a catch for generic `Exception` returning HTTP 500, and the `EventBusUnavailable` handler silently swallows the exception and still returns 204. Neither behavior is specified. The spec declares `responseError: '400|401|403|404|409|422'` with no 500 path. Additionally, `check_cancellation_eligibility` raises `UnprocessableEntity` directly (instead of returning `cancellable=false`), collapsing the `Decision(cancellable)` branch into the exception handler — this is extra control-flow deviation beyond the spec.",
+        "severity": "blocking"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.62,
+    "issues": [
+      {
+        "aspect": "control_flow",
+        "severity": "blocking",
+        "description": "`CheckCancellationEligibility` raises `UnprocessableEntity` for ineligible subscriptions instead of returning `cancellable=false` to context. As a result, the `Decision(cancellable) → if no → RejectCancellation()` branch is never executed via the specified path; the `no` branch is only reachable if `cancellable` is somehow `False` without an exception, which cannot happen in the current implementation. The spec requires the decision and the `no` branch to execute `RejectCancellation()` and return 422 through normal flow, not exception propagation."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "`EventBusUnavailable` is caught at the controller level and swallowed with a log, then 204 is returned. While the spec does not specify a retry policy for the publisher, it also does not specify swallowing this exception. The spec marks `PublishSubscriptionCanceled.exceptions=[\"EventBusUnavailable\"]` without `onRetryExhausted: log_and_continue`, meaning the exception should propagate (or at minimum the spec is silent, so swallowing is an undocumented extra behavior). This is an extra behavior beyond spec (S7 violation) and a semantic deviation."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "The retry loop for `SendCancellationEmail` catches only `EmailProviderError`, but the spec's `retryOn` includes `[\"Timeout\", \"502\", \"503\"]` — these are HTTP-level signals, not Python exception types. The code never distinguishes them; any `EmailProviderError` triggers a retry regardless of whether it maps to Timeout/502/503. The spec intent (retry only on specific transient failures) is not correctly expressed."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "The `publish_subscription_canceled` method wraps all exceptions (including its own `logger.info` call, which cannot reasonably fail) in a broad `except Exception` that re-raises as `EventBusUnavailable`. This means non-transient internal errors are misclassified as bus unavailability."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "blocking",
+        "description": "`CancelSubscription` is marked `transactional: true, consistencyScope: local-transaction`. The implementation performs an in-memory mutation with no actual transaction boundary (no `BEGIN`/`COMMIT`, no unit-of-work, no rollback mechanism). There is no mechanism to roll back the mutation if `PublishSubscriptionCanceled` or subsequent steps fail before the response is committed. The code comment says 'simulated', but the structure does not even stub a transactional wrapper."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "`LoadSubscription` is called with `subscriptionId` from `request` (correct), but the returned `subscription.customer_id` is assigned a fresh `uuid.uuid4()` (line 120) rather than being linked to the `customerId` produced by `AuthorizeCustomer`. The ownership relationship between the authorized customer and the loaded subscription is never validated, defeating the purpose of the security step."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The spec declares `responseError: '400|401|403|404|409|422'` but the implementation never returns 400 or 409. No `BadRequest` or `Conflict` exception is defined or caught. The 500 path (generic `Exception`) is an undeclared error code."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "`AuthorizeCustomer` verifies the token format (`startswith('Bearer ')`) but does not verify that the authenticated customer owns the subscription (the spec's `desc` explicitly requires ownership verification). Ownership check is deferred to a comment and never implemented, even as a stub that cross-references `context.customer_id` against `subscription.customer_id`."
+      }
+    ],
+    "reasoning": "The overall flow ordering is correct (Security → Load → BusinessRule → Decision → branch), all actions are present, and the retry/log-and-continue policy for email is correctly applied. However, the most critical semantic flaw is that `CheckCancellationEligibility` collapses the `cancellable=false` path into exception propagation, meaning the spec's explicit `Decision → no → RejectCancellation` branch is structurally dead code — the `reject_cancellation` method is technically implemented but unreachable via the normal flow path the spec defines. Additionally, the absence of real transaction boundaries for the transactional `CancelSubscription` action and the unverified ownership check are significant correctness gaps. The combination brings the score into the 'noticeable deviations' range."
+  },
+  "specification": {
+    "score": 0.81,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 1.0,
+      "action_semantics": 0.5,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "CheckCancellationEligibility outputs",
+        "description": "The action outputs `cancellable: bool` to context, but it also declares `exceptions: [\"UnprocessableEntity\"]`. The spec does not clarify whether `cancellable=false` should be expressed as a return value (driving the Decision) or as a raised exception. A generator could reasonably implement either, leading to the exact bug found in the code: the exception path swallows the Decision branch.",
+        "suggestedFix": "Clarify that `UnprocessableEntity` is raised only for invalid input (e.g., malformed subscription state), while `cancellable=false` is the normal output for an ineligible-but-valid subscription. Add a note: 'Returns cancellable=false when business rules disallow cancellation; raises UnprocessableEntity only for unexpected/invalid states.'"
+      },
+      {
+        "criterion": "action_semantics",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "PublishSubscriptionCanceled — no retryPolicy",
+        "description": "The Publisher action declares `exceptions: [\"EventBusUnavailable\"]` but has no `retryPolicy` and no `onRetryExhausted` directive. It is unclear whether a bus failure should propagate (rolling back the response), be swallowed, or be retried. This ambiguity caused the code to add undocumented swallow-and-return-204 behavior.",
+        "suggestedFix": "Add a `retryPolicy` and explicit `onRetryExhausted` to `PublishSubscriptionCanceled`, e.g. `{\"maxAttempts\": 3, \"backoffMs\": 500, \"retryOn\": [\"EventBusUnavailable\"], \"onRetryExhausted\": \"raise\"}` if the event is critical, or `\"log_and_continue\"` if best-effort."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "REST DEFINITION responseError",
+        "description": "`responseError: '400|401|403|404|409|422'` lists 400 (Bad Request) and 409 (Conflict) as possible responses, but no action in the spec declares exceptions that map to these codes. There is no action that could produce a 400 (e.g., malformed UUID in path) or a 409 (e.g., concurrent cancellation). The declared error surface is wider than what the actions can produce.",
+        "suggestedFix": "Either remove 400 and 409 from `responseError` if they are not reachable, or add an input-validation action (stereotype: Validation) that raises `BadRequest`, and define a condition (e.g., idempotency check) that raises `Conflict`."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(cancellable)",
+        "description": "The Decision branches are labeled `yes` and `no`, but because `CheckCancellationEligibility` can both return `false` and raise `UnprocessableEntity` for ineligible subscriptions, it is undefined whether the `no` branch is ever reached in normal flow. The spec does not state that the exception from `CheckCancellationEligibility` bypasses the Decision entirely.",
+        "suggestedFix": "Specify explicitly that the `Decision(cancellable)` is evaluated only when `CheckCancellationEligibility` completes without exception, and that an `UnprocessableEntity` from that action skips the Decision and maps to 422 directly. Or, remove the exception from `CheckCancellationEligibility` and reserve it solely for the `RejectCancellation` action in the `no` branch."
+      }
+    ]
+  }
+}

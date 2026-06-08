@@ -1,0 +1,2 @@
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 1 --file diagram-parser\files\activity_parsed\1_activity_with_conditions.json
+INVALID: JSON Schema validation failed: 'target' is a required property (path: nodes -> 0 -> next -> 0)

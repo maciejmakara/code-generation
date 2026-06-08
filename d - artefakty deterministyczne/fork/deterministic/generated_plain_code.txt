@@ -1,0 +1,66 @@
+REST DEFINITION   # @meta {"endpoint": "POST /accounts/{accountId}/statements", "responseSuccess": "202 Accepted", "responseError": "400|401|403|404|409|422"}
+
+function main_Generatemonthlystatement():
+  AuthenticateRequest()  # @meta {"stereotype": "Security", "desc": "Authenticate customer and validate JWT token.", "inputs": [{"name": "authToken", "type": "JWT", "source": "request"}], "outputs": [{"name": "customerId", "type": "UUID", "target": "context"}], "exceptions": ["Unauthorized", "Forbidden"], "preCondition": "valid_jwt_format", "postCondition": "customer_authenticated"}
+  ValidateStatementRequest()  # @meta {"stereotype": "Validation", "desc": "Validate statement request parameters and check idempotency.", "inputs": [{"name": "accountId", "type": "UUID", "source": "request"}, {"name": "statementRequest", "type": "StatementRequest", "source": "request"}, {"name": "idempotencyKey", "type": "String", "source": "request"}, {"name": "customerId", "type": "UUID", "source": "context"}], "outputs": [{"name": "validatedStatement", "type": "ValidatedStatement", "target": "context"}, {"name": "existingStatementId", "type": "UUID?", "target": "context"}, {"name": "accountId", "type": "UUID", "target": "context"}], "exceptions": ["BadRequest", "Conflict", "NotFound"], "preCondition": "customer_authenticated", "postCondition": "request_validated_and_idempotency_checked", "sideEffects": true}
+  EvaluateStatementStatus()  # @meta {"stereotype": "BusinessRule", "desc": "Evaluate current statement status to determine processing path.", "inputs": [{"name": "accountId", "type": "UUID", "source": "context"}, {"name": "validatedStatement", "type": "ValidatedStatement", "source": "context"}], "outputs": [{"name": "statementStatus", "type": "StatementStatus", "target": "context"}], "exceptions": ["Conflict"]}
+  Decision(statementStatus)
+  if completed:
+    BuildCompletedResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response for existing completed statement.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+    FlowJoinGenerateStatement()
+  if running:
+    CheckJobProgress()  # @meta {"stereotype": "Repository", "desc": "Check if running job is stalled or needs to be restarted.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "jobProgress", "type": "JobProgress", "target": "context"}], "exceptions": ["JobNotFound"], "preCondition": "statement_status_running", "postCondition": "job_progress_evaluated"}
+    Decision(jobStalled)
+    if yes:
+      RestartJob()  # @meta {"stereotype": "Repository", "desc": "Restart stalled job with monitoring.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "restartedJobId", "type": "UUID", "target": "context"}], "preCondition": "job_stalled", "postCondition": "job_restarted_and_monitored", "sideEffects": true}
+      BuildRestartedJobResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response for restarted job.", "inputs": [{"name": "restartedJobId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+      FlowJoinJobStalled()
+    if no:
+      BuildRunningResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response for still-running job.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+      FlowJoinJobStalled()
+  if failed:
+    AnalyzeFailureReason()  # @meta {"stereotype": "BusinessRule", "desc": "Analyze why previous statement generation failed.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "failureAnalysis", "type": "FailureAnalysis", "target": "context"}], "exceptions": ["AnalysisUnavailable"], "preCondition": "statement_status_failed", "postCondition": "failure_root_cause_identified"}
+    Decision(retryableFailure)
+    if yes:
+      RecoverFailedJob()  # @meta {"stereotype": "BusinessRule", "desc": "Recover failed job with checkpoint resume.", "inputs": [{"name": "existingStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "recoveryResult", "type": "RecoveryResult", "target": "context"}, {"name": "resumePoint", "type": "ResumePoint", "target": "context"}], "preCondition": "retryable_failure_detected", "postCondition": "job_recovery_initiated", "sideEffects": true}
+      BuildRecoveryResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response for recovered job", "inputs": [{"name": "recoveryResult", "type": "RecoveryResult", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+      FlowJoinRetryableFailure()
+    if no:
+      CreateNewStatementJob()  # @meta {"stereotype": "Repository", "desc": "Create new job for non-retryable failures.", "inputs": [{"name": "accountId", "type": "UUID", "source": "context"}, {"name": "validatedStatement", "type": "ValidatedStatement", "source": "context"}], "outputs": [{"name": "newStatementId", "type": "UUID", "target": "context"}], "sideEffects": true}
+      BuildNewResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response for newly created job", "inputs": [{"name": "newStatementId", "type": "UUID", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+      FlowJoinRetryableFailure()
+  if not_found:
+    CreateStatementJob()  # @meta {"stereotype": "Repository", "desc": "Create statement generation job.", "inputs": [{"name": "accountId", "type": "UUID", "source": "context"}, {"name": "validatedStatement", "type": "ValidatedStatement", "source": "context"}], "outputs": [{"name": "statementId", "type": "UUID", "target": "context"}], "sideEffects": true}
+    Fork(UaauxTmGAqAKCQv1)
+    parallel LoadTransactions:
+      LoadTransactions()  # @meta {"stereotype": "Repository", "desc": "Load transactions for the account and period.", "inputs": [{"name": "accountId", "type": "UUID", "source": "context"}, {"name": "validatedStatement", "type": "ValidatedStatement", "source": "context"}], "outputs": [{"name": "transactions", "type": "Transaction[]", "target": "context"}], "exceptions": ["NotFound", "DataCorruption"], "preCondition": "job_created", "postCondition": "transaction_data_loaded"}
+    parallel LoadFeesAndRates:
+      LoadFeesAndRates()  # @meta {"stereotype": "Cache", "desc": "Load fee schedule and FX rates from cache.", "inputs": [{"name": "validatedStatement", "type": "ValidatedStatement", "source": "context"}], "outputs": [{"name": "feeSchedule", "type": "FeeSchedule", "target": "context"}, {"name": "preliminaryCalculations", "type": "CalculationResult[]", "target": "context"}]}
+    parallel FetchAccountProfile:
+      FetchAccountProfile()  # @meta {"stereotype": "ExternalCall", "desc": "Fetch account holder profile and formatting preferences.", "inputs": [{"name": "accountId", "type": "UUID", "source": "context"}], "outputs": [{"name": "accountProfile", "type": "AccountProfile", "target": "context"}], "retryPolicy": {"maxAttempts": 2, "backoffMs": 400, "retryOn": ["Timeout", "502", "503"], "onRetryExhausted": "throw_ProfileServiceUnavailable"}, "exceptions": ["ProfileServiceUnavailable"], "preCondition": "job_created", "postCondition": "account_profile_retrieved", "sideEffects": false}
+      Decision(profileAvailable)
+      if yes:
+        LoadFormattingPreferences()  # @meta {"stereotype": "Mapper", "desc": "Extract formatting preferences from # account profile", "inputs": [{"name": "accountProfile", "type": "AccountProfile", "source": "context"}], "outputs": [{"name": "formattingPreferences", "type": "FormattingPreferences", "target": "context"}]}
+        FlowJoinProfileResolved()
+      if no:
+        UseDefaultFormattingPreferences()  # @meta {"stereotype": "Mapper", "desc": "Use system default formatting preferences # when profile is unavailable", "outputs": [{"name": "formattingPreferences", "type": "FormattingPreferences", "target": "context"}]}
+        FlowJoinProfileResolved()
+    Join(IyduxTmGAqAKCQ1h)
+    ComputeStatementTotals()  # @meta {"stereotype": "BusinessRule", "desc": "Compute totals using preliminary calculations and transaction data.", "inputs": [{"name": "transactions", "type": "Transaction[]", "source": "context"}, {"name": "feeSchedule", "type": "FeeSchedule", "source": "context"}, {"name": "preliminaryCalculations", "type": "CalculationResult[]", "source": "context"}], "outputs": [{"name": "statementTotals", "type": "StatementTotals", "target": "context"}]}
+    RenderStatementDocument()  # @meta {"stereotype": "Mapper", "desc": "Render document with formatting preferences and computed totals.", "inputs": [{"name": "accountProfile", "type": "AccountProfile", "source": "context"}, {"name": "formattingPreferences", "type": "FormattingPreferences", "source": "context"}, {"name": "transactions", "type": "Transaction[]", "source": "context"}, {"name": "statementTotals", "type": "StatementTotals", "source": "context"}], "outputs": [{"name": "statementDocument", "type": "byte[]", "target": "context"}]}
+    StoreStatement()  # @meta {"stereotype": "ExternalCall", "desc": "Store document to object storage and update job status.", "inputs": [{"name": "statementId", "type": "UUID", "source": "context"}, {"name": "statementDocument", "type": "byte[]", "source": "context"}], "outputs": [{"name": "downloadUrl", "type": "String", "target": "context"}, {"name": "jobStatus", "type": "String", "target": "context"}], "exceptions": ["StorageUnavailable"], "preCondition": "document_rendered", "postCondition": "statement_stored_and_job_completed", "sideEffects": true, "retryPolicy": {"maxAttempts": 3, "backoffMs": 500, "retryOn": ["Timeout", "502", "503", "StorageUnavailable"], "onRetryExhausted": "throw_StorageUnavailable"}}
+    PublishStatementReady()  # @meta {"stereotype": "Publisher", "desc": "Publish StatementReady domain event", "inputs": [{"name": "statementId", "type": "UUID", "source": "context"}, {"name": "downloadUrl", "type": "String", "source": "context"}], "outputs": [{"name": "eventPublished", "type": "bool", "target": "event"}], "exceptions": ["EventPublishFailed"], "sideEffects": true}
+    BuildStatementResponse()  # @meta {"stereotype": "Mapper", "desc": "Build 202 response with download URL", "inputs": [{"name": "statementId", "type": "UUID", "source": "context"}, {"name": "downloadUrl", "type": "String", "source": "context"}], "outputs": [{"name": "response", "type": "StatementAcceptedResponse", "target": "response"}]}
+    FlowJoinGenerateStatement()
+
+function FlowJoinGenerateStatement():
+  end()
+
+function FlowJoinJobStalled():
+  FlowJoinGenerateStatement()
+
+function FlowJoinRetryableFailure():
+  FlowJoinGenerateStatement()
+
+function FlowJoinProfileResolved():
+  return

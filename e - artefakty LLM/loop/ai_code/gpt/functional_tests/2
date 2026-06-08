@@ -1,0 +1,3 @@
+T2a - mixed content: PASS
+T2b - all invalid: FAIL, should persist 0 contacts. Expected=0, actual=1
+T2c - duplicate in batch: PASS

@@ -1,0 +1,143 @@
+{
+  "structural": {
+    "score": 0.79,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 0.5,
+      "branches_coverage": 0.5,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S2",
+        "score": 0.5,
+        "finding": "The spec defines a single Decision(isTimeout) that acts as a shared timeout guard for CreateUserAccount, SendActivationEmail (via BackToDecision). The implementation replaces this with three separate try/except TimeoutException blocks per action, plus a general outer catch. There is no unified decision construct representing the single Decision(isTimeout) node.",
+        "severity": "minor"
+      },
+      {
+        "criterion": "S3",
+        "score": 0.5,
+        "finding": "Branch 'okfilterdisposableemaildomains' is implemented correctly. Branch 'okcreateuseraccount' (BackToDecision returning to isTimeout after CreateUserAccount) is partially modelled — the code handles TimeoutException from CreateUserAccount but does not structurally represent the branch label 'okcreateuseraccount' as a named convergence point. Branch 'oksendactivationemail' is similarly handled inline without explicit convergence. The 'exception' branch of isTimeout (leading to HandleRegistrationTimeout → FlowJoinRegistration) is replicated three times rather than converging through a single handler path.",
+        "severity": "minor"
+      },
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "The implementation adds: (1) a generic 500 Internal Server Error catch-all handler not present in the spec; (2) audit logging calls after nearly every action beyond what auditRequired=true specifies (spec marks only FilterDisposableEmailDomains and CreateUserAccount as auditRequired=true); (3) FinalizeRegistration TimeoutException handler — the spec does not declare TimeoutException in FinalizeRegistration's exceptions list; (4) a success response body includes 'user_id' and 'email' fields not specified in the spec (spec only declares requestId as response output from FinalizeRegistration).",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.72,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "blocking",
+        "description": "SendActivationEmail retry policy specifies onRetryExhausted: 'raise', meaning after 3 failed attempts the exception must propagate upward. The implementation wraps the RetryPolicy call in a try/except TimeoutException that catches and converts it to a 504 error response locally. This is semantically correct for TimeoutException but the RetryPolicy.execute_with_retry re-raises the last exception only if it is not retryable or max attempts reached — for a TimeoutException that IS in retry_on, it will re-raise after exhaustion, which is then caught. However, the retry condition check uses string matching ('Timeout' in str(e)) against a TimeoutException instance, which will match since the class name contains 'Timeout'. This is fragile and accidental correctness rather than explicit handling."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "CheckEmailUniqueness declares TimeoutException in its exceptions list but the implementation only catches ConflictException from this call. A TimeoutException raised by CheckEmailUniqueness would fall through to the outer general TimeoutException handler, bypassing the unified Decision(isTimeout) path. Per spec, any TimeoutException regardless of source should route through the isTimeout decision to HandleRegistrationTimeout."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "blocking",
+        "description": "CreateUserAccount is marked transactional=true with consistencyScope=local-transaction. FinalizeRegistration is also transactional=true with consistencyScope=local-transaction. The implementation has no transaction management whatsoever — no BEGIN/COMMIT/ROLLBACK, no unit-of-work pattern, no session management. These are plain method calls with no transactional boundary."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "FinalizeRegistration spec output is {requestId: UUID, target: response}. The implementation returns user_id (the UUID of the user) as context.request_id, which is then emitted as request_id in the 201 response. The variable naming is ambiguous — finalize_registration() returns user_id, not a distinct requestId. The spec implies requestId is a separate identifier for the registration request, not the userId."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The 201 Created success response body includes 'user_id', 'email', and 'message' fields. The spec only declares requestId as a response output from FinalizeRegistration. Emitting userId and email in the success response is undeclared extra behavior."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "DisposableEmailDetected is mapped to 422 Unprocessable Entity, which aligns with the spec's responseError list. ConflictException is mapped to 409 Conflict, which also aligns. ValidationException is mapped to 400, which aligns. TimeoutException is mapped to 504 Gateway Timeout, which aligns. HTTP contract mapping is otherwise correct."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "The spec includes no explicit Security-stereotype action, so no ordering violation exists there. However, password hashing is performed inside ValidateUserInput (validation stereotype) rather than in CreateUserAccount (repository stereotype). The spec states CreateUserAccount persists 'hashed credentials', implying hashing is a concern of the persistence layer. The implementation hashes during validation, meaning ValidatedUserData already contains the hash, which works functionally but misaligns with the spec's implied responsibility boundary."
+      },
+      {
+        "aspect": "state_transitions",
+        "severity": "minor",
+        "description": "HandleRegistrationTimeout declares postCondition: registrationStatus_Failed. The implementation does not set any such status flag on the user record (if one was created) before returning the error response. FinalizeRegistration postCondition userStatus_Active is correctly implemented via setting status='active'."
+      }
+    ],
+    "reasoning": "The implementation correctly covers the happy path and all major exception branches. All six spec actions are present and called in the correct sequence. The retry policy for SendActivationEmail is implemented with correct parameters (maxAttempts=3, backoffMs=300, retryOn=[Timeout,502,503]). The most significant deviations are: (1) complete absence of transaction management for two transactional actions, which is a blocking gap for production correctness; (2) fragile retry exhaustion handling via string matching; (3) TimeoutException from CheckEmailUniqueness not routed through the isTimeout decision; (4) postCondition for registrationStatus_Failed not applied. The control flow approximation of Decision(isTimeout) via distributed try/except blocks is functionally equivalent for the cases covered but loses the structural clarity and misses the CheckEmailUniqueness timeout path."
+  },
+  "specification": {
+    "score": 0.69,
+    "breakdown": {
+      "actions_completeness": 0.5,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "actions_completeness",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness()",
+        "description": "CheckEmailUniqueness is missing outputs metadata entirely. It declares exceptions and side-effect flags but has no outputs block. It is unclear whether the action confirms uniqueness by returning a boolean to context or simply throws on failure. Generators may omit storing any result or may infer a boolean output.",
+        "suggestedFix": "Add outputs: [{name: 'emailUnique', type: 'bool', target: 'context'}] or explicitly document that the action is void and signals only via exception."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "FinalizeRegistration() outputs",
+        "description": "FinalizeRegistration declares output {name: 'requestId', type: UUID, target: response}. It is unclear whether requestId is the same UUID as userId (returned from CreateUserAccount) or a distinct registration-request identifier. The naming collision with the controller's local request_id variable in the generated code demonstrates real ambiguity.",
+        "suggestedFix": "Clarify if requestId is a new UUID generated by FinalizeRegistration or an alias for userId. If distinct, add it as a new generated value; if the same, rename to userId or document the aliasing explicitly."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "HandleRegistrationTimeout() postCondition",
+        "description": "postCondition: registrationStatus_Failed is declared but there is no corresponding state field in any data model, no prior preCondition establishing the initial registration state, and no output that carries this status. The condition cannot be verified or implemented without a state model.",
+        "suggestedFix": "Define a registrationStatus state variable in context (e.g., outputs: [{name: 'registrationStatus', type: 'RegistrationStatus', target: 'context'}]) and declare the enum values (Pending, Failed, Active). Reference this state in postConditions consistently."
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CreateUserAccount() and FinalizeRegistration()",
+        "description": "Both actions are marked transactional=true with consistencyScope=local-transaction but the spec does not define whether they share a single transaction boundary or each has its own. If CreateUserAccount succeeds and SendActivationEmail then exhausts retries and raises, the user row is committed but registration is never finalized — the spec provides no compensating transaction or rollback instruction for this partial state.",
+        "suggestedFix": "Add a compensation or rollback action (e.g., RollbackUserCreation) reachable from the timeout/exception path after CreateUserAccount has committed, or clarify that both actions share a single distributed transaction scope."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness() — TimeoutException",
+        "description": "CheckEmailUniqueness declares TimeoutException in its exceptions list, implying it can timeout. However, the Decision(isTimeout) and BackToDecision mechanism is only shown in the flow after FilterDisposableEmailDomains and CreateUserAccount. There is no BackToDecision(isTimeout) from CheckEmailUniqueness, leaving the timeout path from this action undefined.",
+        "suggestedFix": "Add BackToDecision(isTimeout)(okcheckemailuniqueness) after CheckEmailUniqueness to explicitly route its TimeoutException through the shared isTimeout decision, consistent with the pattern used for other actions."
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(isTimeout)",
+        "description": "The decision is named 'isTimeout' but its branches are labelled 'okfilterdisposableemaildomains', 'okcreateuseraccount', 'oksendactivationemail', and 'exception'. The naming implies it is a multipurpose convergence point routing both success continuations and exception handling. The condition evaluated at this decision is never formally stated — it is unclear whether it checks for TimeoutException, evaluates a boolean flag, or simply acts as a routing fork. This ambiguity caused the generator to implement three independent try/except blocks instead of a single decision node.",
+        "suggestedFix": "Rename branches to reflect the actual condition (e.g., if timeout: / if ok:) and clarify the input condition. Consider splitting into separate decisions per action if the intent is per-action timeout guarding, or explicitly document that all timeout exceptions from the enclosed actions converge here."
+      }
+    ]
+  }
+}

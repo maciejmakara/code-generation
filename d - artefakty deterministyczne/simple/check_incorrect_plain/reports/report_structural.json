@@ -1,0 +1,16 @@
+{
+  "missing_actions": [],
+  "missing_decisions": [],
+  "extra_actions": [],
+  "unmatched_calls": [],
+  "missing_decision_branches": {},
+  "summary": {
+    "total_reference_actions": 7,
+    "total_reference_decisions": 1,
+    "found_calls": 9,
+    "missing_actions_count": 0,
+    "missing_decisions_count": 0,
+    "extra_actions_count": 0,
+    "missing_branches_count": 0
+  }
+}

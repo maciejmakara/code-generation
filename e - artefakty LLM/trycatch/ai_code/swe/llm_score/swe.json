@@ -1,0 +1,101 @@
+{
+  "structural": {
+    "score": 0.86,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 0.5,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 0.5
+    },
+    "issues": [
+      {
+        "criterion": "S2",
+        "score": 0.5,
+        "finding": "Decision(isTimeout) is implemented as try-catch blocks rather than explicit conditional construct",
+        "severity": "minor"
+      },
+      {
+        "criterion": "S7",
+        "score": 0.5,
+        "finding": "Additional validation logic (password length, name validation) beyond specification requirements",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.78,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "Context data flow correctly implemented, but FilterDisposableEmailDomains returns bool instead of setting context.email_allowed directly"
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "Timeout handling implemented correctly, but BackToDecision flow implemented with nested try-catch instead of explicit decision return"
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "Transactional actions marked but no explicit transaction boundaries implemented"
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "blocking",
+        "description": "FinalizeRegistration should return requestId in response but implementation returns user_id as requestId"
+      }
+    ],
+    "reasoning": "Code implements most semantic requirements correctly including data flow through context, exception handling with proper propagation, and audit logging. However, HTTP contract has a critical deviation where requestId is incorrectly mapped, and transaction boundaries are not explicitly implemented despite being specified."
+  },
+  "specification": {
+    "score": 0.75,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 1.0,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.5,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "FilterDisposableEmailDomains",
+        "description": "Output specification unclear - returns bool but context.email_allowed should be set",
+        "suggestedFix": "Specify that emailAllowed output should be set in context, not returned"
+      },
+      {
+        "criterion": "transaction_consistency",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CreateUserAccount, FinalizeRegistration",
+        "description": "Transactional scope defined but transaction boundaries and rollback behavior not specified",
+        "suggestedFix": "Define explicit transaction begin/commit/rollback boundaries"
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(isTimeout)",
+        "description": "Timeout decision condition unclear - how to detect timeout vs other exceptions",
+        "suggestedFix": "Specify timeout detection mechanism and exception routing"
+      },
+      {
+        "criterion": "decision_conditions",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "Decision(isTimeout)",
+        "description": "Decision condition name 'isTimeout' doesn't clearly map to business logic",
+        "suggestedFix": "Rename to more descriptive condition like 'hasTimeoutOccurred'"
+      }
+    ]
+  }
+}

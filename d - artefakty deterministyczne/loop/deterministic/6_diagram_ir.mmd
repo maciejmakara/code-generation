@@ -1,0 +1,60 @@
+flowchart TB
+  4Mmo8dmGAqAArgl0(("4Mmo8dmGAqAArgl0\<br/>uml:InitialNode"))
+  4XDY8dmGAqAArgqC((("4XDY8dmGAqAArgqC\<br/>uml:ActivityFinalNode")))
+  AddBatchDuplicateError["AddBatchDuplicateError\<br/>uml:CallBehaviorAction"]
+  AddRowValidationError["AddRowValidationError\<br/>uml:CallBehaviorAction"]
+  AuthorizeOperator["AuthorizeOperator\<br/>uml:CallBehaviorAction"]
+  BuildAcceptedResponse["BuildAcceptedResponse\<br/>uml:CallBehaviorAction"]
+  CheckImportIdempotency["CheckImportIdempotency\<br/>uml:CallBehaviorAction"]
+  FilterDuplicateInBatch["FilterDuplicateInBatch\<br/>uml:CallBehaviorAction"]
+  FlowJoinAfterRow{"FlowJoinAfterRow\<br/>uml:MergeNode"}
+  FlowJoinBulkImportContacts{"FlowJoinBulkImportContacts\<br/>uml:MergeNode"}
+  FlowJoinDuplicate{"FlowJoinDuplicate\<br/>uml:MergeNode"}
+  FlowJoinProcessRow{"FlowJoinProcessRow\<br/>uml:MergeNode"}
+  IncrementRowIndex["IncrementRowIndex\<br/>uml:CallBehaviorAction"]
+  InitializeImportCounters["InitializeImportCounters\<br/>uml:CallBehaviorAction"]
+  LoadImportFile["LoadImportFile\<br/>uml:CallBehaviorAction"]
+  MapRowToContact["MapRowToContact\<br/>uml:CallBehaviorAction"]
+  ParseCsvRows["ParseCsvRows\<br/>uml:CallBehaviorAction"]
+  PersistImportSummary["PersistImportSummary\<br/>uml:CallBehaviorAction"]
+  PublishImportCompleted["PublishImportCompleted\<br/>uml:CallBehaviorAction"]
+  ReadNextRow["ReadNextRow\<br/>uml:CallBehaviorAction"]
+  ReturnExistingImport["ReturnExistingImport\<br/>uml:CallBehaviorAction"]
+  UpsertContact["UpsertContact\<br/>uml:CallBehaviorAction"]
+  ValidateImportRequest["ValidateImportRequest\<br/>uml:CallBehaviorAction"]
+  ValidateRow["ValidateRow\<br/>uml:CallBehaviorAction"]
+  importAlreadyExists?{"importAlreadyExists?\<br/>uml:DecisionNode"}
+  notDuplicate?{"notDuplicate?\<br/>uml:DecisionNode"}
+  rowIndexLessTotalRows?{"rowIndexLessTotalRows?\<br/>uml:DecisionNode"}
+  rowValid?{"rowValid?\<br/>uml:DecisionNode"}
+  4Mmo8dmGAqAArgl0 --> AuthorizeOperator
+  AuthorizeOperator --> ValidateImportRequest
+  ValidateImportRequest --> CheckImportIdempotency
+  CheckImportIdempotency --> importAlreadyExists?
+  importAlreadyExists? -- "yes" --> ReturnExistingImport
+  importAlreadyExists? -- "no" --> LoadImportFile
+  ReturnExistingImport --> FlowJoinBulkImportContacts
+  FlowJoinBulkImportContacts --> 4XDY8dmGAqAArgqC
+  LoadImportFile --> ParseCsvRows
+  ParseCsvRows --> InitializeImportCounters
+  InitializeImportCounters --> FlowJoinProcessRow
+  rowIndexLessTotalRows? -- "yes" --> ReadNextRow
+  rowIndexLessTotalRows? -- "no" --> PersistImportSummary
+  ReadNextRow --> ValidateRow
+  ValidateRow --> rowValid?
+  rowValid? -- "false" --> AddRowValidationError
+  rowValid? -- "true" --> FilterDuplicateInBatch
+  AddRowValidationError --> FlowJoinAfterRow
+  FlowJoinAfterRow --> IncrementRowIndex
+  FilterDuplicateInBatch --> notDuplicate?
+  notDuplicate? -- "false" --> AddBatchDuplicateError
+  notDuplicate? -- "true" --> MapRowToContact
+  AddBatchDuplicateError --> FlowJoinDuplicate
+  FlowJoinDuplicate --> FlowJoinAfterRow
+  MapRowToContact --> UpsertContact
+  UpsertContact --> FlowJoinDuplicate
+  FlowJoinProcessRow --> rowIndexLessTotalRows?
+  PersistImportSummary --> PublishImportCompleted
+  PublishImportCompleted --> BuildAcceptedResponse
+  BuildAcceptedResponse --> FlowJoinBulkImportContacts
+  IncrementRowIndex --> FlowJoinProcessRow

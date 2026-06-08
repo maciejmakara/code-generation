@@ -1,0 +1,88 @@
+{
+  "structural": {
+    "score": 1.0,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": []
+  },
+  "semantic": {
+    "score": 0.82,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "SendCancellationEmail exhausted-retry path re-wraps as EmailProviderError\nWhen RetryHelper exhausts retries and on_retry_exhausted == \"log_and_continue\", it returns None — correct. But the caller wraps any other raised exception in a new EmailProviderError and re-raises it (lines 500–503). The spec marks onRetryExhausted: \"log_and_continue\", meaning all exhaustion should be swallowed. Because the retry helper only enters log_and_continue after exhausting retries with retryable labels, a non-retryable exception (e.g. an unexpected ValueError) will break out of the while-loop, skip the log_and_continue branch, and raise RetryExhaustedError. The outer catch then converts it to EmailProviderError and propagates, rolling back nothing but surfacing as HTTP 409 — inconsistent with best-effort spec semantics."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "PublishSubscriptionCanceled runs outside the transaction boundary\nCancelSubscription() is wrapped in tx_manager.transaction(\"CancelSubscription\"). The spec sets transactional: true only on that action, so this is correct in isolation. However, if PublishSubscriptionCanceled() raises EventBusUnavailable the subscription is already committed and the event is lost with no compensation. The spec does not define a compensating action, but it also does not declare EventBusUnavailable as non-fatal. This is an ambiguity in the spec (see Part 3), but the implementation should at minimum document the atomicity gap."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "EventBusUnavailable mapped to 409 Conflict\nThe spec's responseError set is 400|401|403|404|409|422. The implementation maps EventBusUnavailable to 409. While 409 is in the allowed set, it semantically means \"conflict with current resource state.\" A more appropriate mapping would be 503 (but that's not in the declared set). The code acknowledges this with a comment, but the choice may surprise API consumers expecting 409 to mean a subscription state conflict rather than an infrastructure failure."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "AuthorizeCustomer performs a repository lookup\nThe spec inputs for AuthorizeCustomer are authToken and subscriptionId (both source: request). In the implementation, AuthorizeCustomer calls self.repository.get_by_id() to verify ownership — a second DB call before LoadSubscription(). This is a reasonable real-world pattern, but it introduces a race: the subscription could change state between this lookup and the one in LoadSubscription(). More importantly, the spec does not list subscription as an input to AuthorizeCustomer, so this is an undeclared dependency on a repository side-effect not expressed in the spec's data flow."
+      }
+    ],
+    "reasoning": "The implementation is solid and faithfully follows the happy path and the no-branch. The retry infrastructure, transaction boundary, post-condition assertions, and context propagation are all correct. The deductions come from: (1) a subtle edge case in the retry exhaustion logic that can leak EmailProviderError against the best-effort intent; (2) the publish-after-commit atomicity gap; (3) a questionable but documented HTTP status mapping; and (4) an undeclared repo call inside the security action. None of these are blocking defects, but together they represent real divergence from the spec's intent."
+  },
+  "specification": {
+    "score": 0.75,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 0.5,
+      "exception_handling": 0.5,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "AuthorizeCustomer() — inputs.",
+        "description": "The action must verify that the authenticated customer owns the given subscriptionId. To do so it needs to resolve the subscription's owner. The spec lists only authToken and subscriptionId as inputs with no mechanism for the ownership check. A generator will either add a hidden repo call (as this implementation does) or implement an incomplete security check.",
+        "suggestedFix": "Add {\"name\": \"subscription\", \"type\": \"Subscription\", \"source\": \"context\"} as an input and move LoadSubscription() before AuthorizeCustomer(), or define a separate lightweight ResolveSubscriptionOwner() action"
+      },
+      {
+        "criterion": "incompletestate_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckCancellationEligibility() — preCondition",
+        "description": "All other stateful actions declare explicit preCondition or the conditions are inferable. CheckCancellationEligibility has no preCondition despite requiring context.subscription to be populated. A generator cannot know whether to enforce this or assume it.",
+        "suggestedFix": "Add \"preCondition\": \"subscription != null\"."
+      },
+      {
+        "criterion": "transaction_consistency ",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "PublishSubscriptionCanceled() — consistencyScope / transactional.",
+        "description": "CancelSubscription is transactional: true, consistencyScope: \"local-transaction\". PublishSubscriptionCanceled has no transactional or consistencyScope fields. It is unclear whether the event publish should be inside or outside the DB transaction, and whether a publish failure should roll back the cancellation. The spec's postCondition: \"event_published\" implies a hard requirement, but the declared exception EventBusUnavailable has no BackToDecision handler — implying it propagates and cancels the request (rolling back the already-committed subscription).",
+        "suggestedFix": "Explicitly set \"consistencyScope\": \"eventual\" and add a note on whether publish failure should trigger compensation, or mark it as best-effort like SendCancellationEmail."
+      },
+      {
+        "criterion": "incompleteexception_handling ",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "PublishSubscriptionCanceled() — exceptions flow.",
+        "description": "EventBusUnavailable is declared as an exception but there is no BackToDecision or explicit error output mapping. A generator cannot determine the HTTP status code (503 is natural but not in the declared responseError set) or whether the cancellation should be compensated. This forced the implementation to use a debatable 409 mapping.",
+        "suggestedFix": "Add EventBusUnavailable to the REST DEFINITION responseError (e.g. extend to include 503) and define its behavior — either compensation or propagation with a specific status."
+      }
+    ]
+  }
+}

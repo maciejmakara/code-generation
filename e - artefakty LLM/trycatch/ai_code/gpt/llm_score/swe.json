@@ -1,0 +1,54 @@
+{
+  "structural": {
+    "score": 1.0,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 1.0,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": []
+  },
+  "semantic": {
+    "score": 0.85,
+    "issues": [
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "FilterDisposableEmailDomains returns bool but spec expects emailAllowed in context - implementation correctly stores this"
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "Missing 422 status code in response mapping but handled in exception handler"
+      }
+    ],
+    "reasoning": "The implementation correctly follows the specification's control flow with proper decision state management. All actions are implemented with correct inputs/outputs, exception handling matches the BackToDecision pattern, and transaction boundaries are properly applied. HTTP contract is mostly correct with proper endpoint mapping and status codes. Minor deviations in response mapping don't affect functionality."
+  },
+  "specification": {
+    "score": 0.875,
+    "breakdown": {
+      "actions_completeness": 1.0,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 1.0,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 1.0,
+      "decision_conditions": 1.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "ambiguous",
+        "location": "FilterDisposableEmailDomains outputs",
+        "description": "Output specified as emailAllowed(bool) to context but target unclear if direct assignment or transformation needed",
+        "suggestedFix": "Clarify whether emailAllowed should be directly assigned to context.emailAllowed or requires transformation"
+      }
+    ]
+  }
+}

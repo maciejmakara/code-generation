@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["activity", "flow"],
+  "properties": {
+    "activity": { "type": "string" },
+    "flow": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/flowItem" }
+    }
+  },
+
+  "definitions": {
+    "flowItem": {
+      "oneOf": [
+        { "$ref": "#/definitions/simpleStep" },
+        { "$ref": "#/definitions/decisionStep" }
+      ]
+    },
+
+    "simpleStep": {
+      "type": "object",
+      "required": ["step", "action", "type"],
+      "properties": {
+        "step": { "type": "string" },
+        "action": { "type": "string" },
+        "type": {
+          "type": "string",
+          "not": { "const": "uml:DecisionNode" }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "decisionStep": {
+      "type": "object",
+      "required": ["step", "action", "type"],
+      "properties": {
+        "step": { "type": "string" },
+        "action": { "type": "string" },
+        "type": {
+          "const": "uml:DecisionNode"
+        },
+        "branches": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/branch" }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "branch": {
+      "type": "object",
+      "required": ["condition", "path"],
+      "properties": {
+        "condition": { "type": ["string", "null"] },
+        "path": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/flowItem" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

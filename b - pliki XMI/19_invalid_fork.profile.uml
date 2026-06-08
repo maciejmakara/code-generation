@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Profile name="import_profile" xmi:id="YywtP5mGAqAArhCM_profile" xmi:version="2.1" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/2.0.0/UML" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+	<packageImport xmi:id="YywtP5mGAqAArhCM_profile_UMLMetaModel">
+		<importedPackage href="pathmap://UML_METAMODELS/UML.metamodel.uml#_0" xmi:type="uml:Model"/>
+	</packageImport>
+	<eAnnotations source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="YywtP5mGAqAArhCM_profile_definition">
+		<contents name="import_profile" nsPrefix="import_profile" nsURI="http:///schemas/import_profile/0" xmi:id="YywtP5mGAqAArhCM_content" xmi:type="ecore:EPackage">
+			<eClassifiers name="valueSpecificationAction" xmi:id="dNUl4FmGAqAArhJA_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="dNUl4FmGAqAArhJA" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="dNUl4FmGAqAArhJA_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="dNUl4FmGAqAArhJA_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="RestEndpoint" xmi:id="zNUl4FmGAqAArhJB_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="zNUl4FmGAqAArhJB" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="zNUl4FmGAqAArhJB_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="zNUl4FmGAqAArhJB_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Validation" xmi:id="BkpV4FmGAqAArhRb_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="BkpV4FmGAqAArhRb" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="BkpV4FmGAqAArhRb_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="BkpV4FmGAqAArhRb_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="BusinessRule" xmi:id=".1lV4FmGAqAArhRi_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references=".1lV4FmGAqAArhRi" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id=".1lV4FmGAqAArhRi_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id=".1lV4FmGAqAArhRi_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ErrorHandler" xmi:id="9PtV4FmGAqAArhRt_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="9PtV4FmGAqAArhRt" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="9PtV4FmGAqAArhRt_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="9PtV4FmGAqAArhRt_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="SystemAction" xmi:id="YmLV4FmGAqAArhR2_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="YmLV4FmGAqAArhR2" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="YmLV4FmGAqAArhR2_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="YmLV4FmGAqAArhR2_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ExternalCall" xmi:id="AL3V4FmGAqAArhSB_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="AL3V4FmGAqAArhSB" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="AL3V4FmGAqAArhSB_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="AL3V4FmGAqAArhSB_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ServiceCall" xmi:id="XFo9.1mGAqAArgry_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="XFo9.1mGAqAArgry" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="XFo9.1mGAqAArgry_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="XFo9.1mGAqAArgry_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Repository" xmi:id="PwfcltmGAqAArgvx_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="PwfcltmGAqAArgvx" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="PwfcltmGAqAArgvx_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="PwfcltmGAqAArgvx_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Security" xmi:id="f0vo8dmGAqAArgnK_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="f0vo8dmGAqAArgnK" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="f0vo8dmGAqAArgnK_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="f0vo8dmGAqAArgnK_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Mapper" xmi:id="utFY8dmGAqAArgpw_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="utFY8dmGAqAArgpw" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="utFY8dmGAqAArgpw_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="utFY8dmGAqAArgpw_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Utility" xmi:id="5Is48dmGAqAArgrN_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="5Is48dmGAqAArgrN" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="5Is48dmGAqAArgrN_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="5Is48dmGAqAArgrN_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Filter" xmi:id="m2qE8dmGAqAArgtL_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="m2qE8dmGAqAArgtL" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="m2qE8dmGAqAArgtL_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="m2qE8dmGAqAArgtL_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Publisher" xmi:id="fVu08dmGAqAArg0U_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="fVu08dmGAqAArg0U" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="fVu08dmGAqAArg0U_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="fVu08dmGAqAArg0U_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Cache" xmi:id="LFMpxTmGAqAKCRFz_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="LFMpxTmGAqAKCRFz" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="LFMpxTmGAqAKCRFz_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_ActivityAction" ordered="false" xmi:id="LFMpxTmGAqAKCRFz_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//ActivityAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="BusinessRule" xmi:id=".1lV4FmGAqAArhRi_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references=".1lV4FmGAqAArhRi" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id=".1lV4FmGAqAArhRi_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id=".1lV4FmGAqAArhRi_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="RestEndpoint" xmi:id="zNUl4FmGAqAArhJB_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="zNUl4FmGAqAArhJB" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="zNUl4FmGAqAArhJB_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="zNUl4FmGAqAArhJB_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Validation" xmi:id="BkpV4FmGAqAArhRb_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="BkpV4FmGAqAArhRb" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="BkpV4FmGAqAArhRb_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="BkpV4FmGAqAArhRb_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ExternalCall" xmi:id="AL3V4FmGAqAArhSB_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="AL3V4FmGAqAArhSB" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="AL3V4FmGAqAArhSB_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="AL3V4FmGAqAArhSB_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ErrorHandler" xmi:id="9PtV4FmGAqAArhRt_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="9PtV4FmGAqAArhRt" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="9PtV4FmGAqAArhRt_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="9PtV4FmGAqAArhRt_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="SystemAction" xmi:id="YmLV4FmGAqAArhR2_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="YmLV4FmGAqAArhR2" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="YmLV4FmGAqAArhR2_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="YmLV4FmGAqAArhR2_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="ServiceCall" xmi:id="XFo9.1mGAqAArgry_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="XFo9.1mGAqAArgry" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="XFo9.1mGAqAArgry_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="XFo9.1mGAqAArgry_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Repository" xmi:id="PwfcltmGAqAArgvx_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="PwfcltmGAqAArgvx" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="PwfcltmGAqAArgvx_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="PwfcltmGAqAArgvx_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Security" xmi:id="f0vo8dmGAqAArgnK_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="f0vo8dmGAqAArgnK" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="f0vo8dmGAqAArgnK_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="f0vo8dmGAqAArgnK_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Mapper" xmi:id="utFY8dmGAqAArgpw_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="utFY8dmGAqAArgpw" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="utFY8dmGAqAArgpw_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="utFY8dmGAqAArgpw_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Utility" xmi:id="5Is48dmGAqAArgrN_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="5Is48dmGAqAArgrN" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="5Is48dmGAqAArgrN_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="5Is48dmGAqAArgrN_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Filter" xmi:id="m2qE8dmGAqAArgtL_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="m2qE8dmGAqAArgtL" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="m2qE8dmGAqAArgtL_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="m2qE8dmGAqAArgtL_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Publisher" xmi:id="fVu08dmGAqAArg0U_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="fVu08dmGAqAArg0U" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="fVu08dmGAqAArg0U_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="fVu08dmGAqAArg0U_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+			<eClassifiers name="Cache" xmi:id="LFMpxTmGAqAKCRFz_classifier" xmi:type="ecore:EClass">
+				<eAnnotations references="LFMpxTmGAqAKCRFz" source="http://www.eclipse.org/uml2/2.0.0/UML" xmi:id="LFMpxTmGAqAKCRFz_annotation"/>
+				<eStructuralFeatures lowerBound="1" name="base_CallBehaviorAction" ordered="false" xmi:id="LFMpxTmGAqAKCRFz_structuralFeature" xmi:type="ecore:EReference">
+					<eType href="http://www.eclipse.org/uml2/2.0.0/UML#//CallBehaviorAction" xmi:type="ecore:EClass"/>
+				</eStructuralFeatures>
+			</eClassifiers>
+		</contents>
+	</eAnnotations>
+	<packagedElement name="valueSpecificationAction" xmi:id="dNUl4FmGAqAArhJA" xmi:type="uml:Stereotype">
+		<ownedAttribute association="dNUl4FmGAqAArhJA_extension" name="base_ActivityAction" xmi:id="dNUl4FmGAqAArhJA_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="dNUl4FmGAqAArhJA_from dNUl4FmGAqAArhJA_to" name="ActivityAction_valueSpecificationAction" xmi:id="dNUl4FmGAqAArhJA_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="dNUl4FmGAqAArhJA_extension" type="dNUl4FmGAqAArhJA" xmi:id="dNUl4FmGAqAArhJA_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="RestEndpoint" xmi:id="zNUl4FmGAqAArhJB" xmi:type="uml:Stereotype">
+		<ownedAttribute association="zNUl4FmGAqAArhJB_extension" name="base_ActivityAction" xmi:id="zNUl4FmGAqAArhJB_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="zNUl4FmGAqAArhJB_from zNUl4FmGAqAArhJB_to" name="ActivityAction_RestEndpoint" xmi:id="zNUl4FmGAqAArhJB_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="zNUl4FmGAqAArhJB_extension" type="zNUl4FmGAqAArhJB" xmi:id="zNUl4FmGAqAArhJB_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Validation" xmi:id="BkpV4FmGAqAArhRb" xmi:type="uml:Stereotype">
+		<ownedAttribute association="BkpV4FmGAqAArhRb_extension" name="base_ActivityAction" xmi:id="BkpV4FmGAqAArhRb_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="BkpV4FmGAqAArhRb_from BkpV4FmGAqAArhRb_to" name="ActivityAction_Validation" xmi:id="BkpV4FmGAqAArhRb_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="BkpV4FmGAqAArhRb_extension" type="BkpV4FmGAqAArhRb" xmi:id="BkpV4FmGAqAArhRb_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="BusinessRule" xmi:id=".1lV4FmGAqAArhRi" xmi:type="uml:Stereotype">
+		<ownedAttribute association=".1lV4FmGAqAArhRi_extension" name="base_ActivityAction" xmi:id=".1lV4FmGAqAArhRi_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd=".1lV4FmGAqAArhRi_from .1lV4FmGAqAArhRi_to" name="ActivityAction_BusinessRule" xmi:id=".1lV4FmGAqAArhRi_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association=".1lV4FmGAqAArhRi_extension" type=".1lV4FmGAqAArhRi" xmi:id=".1lV4FmGAqAArhRi_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ErrorHandler" xmi:id="9PtV4FmGAqAArhRt" xmi:type="uml:Stereotype">
+		<ownedAttribute association="9PtV4FmGAqAArhRt_extension" name="base_ActivityAction" xmi:id="9PtV4FmGAqAArhRt_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="9PtV4FmGAqAArhRt_from 9PtV4FmGAqAArhRt_to" name="ActivityAction_ErrorHandler" xmi:id="9PtV4FmGAqAArhRt_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="9PtV4FmGAqAArhRt_extension" type="9PtV4FmGAqAArhRt" xmi:id="9PtV4FmGAqAArhRt_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="SystemAction" xmi:id="YmLV4FmGAqAArhR2" xmi:type="uml:Stereotype">
+		<ownedAttribute association="YmLV4FmGAqAArhR2_extension" name="base_ActivityAction" xmi:id="YmLV4FmGAqAArhR2_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="YmLV4FmGAqAArhR2_from YmLV4FmGAqAArhR2_to" name="ActivityAction_SystemAction" xmi:id="YmLV4FmGAqAArhR2_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="YmLV4FmGAqAArhR2_extension" type="YmLV4FmGAqAArhR2" xmi:id="YmLV4FmGAqAArhR2_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ExternalCall" xmi:id="AL3V4FmGAqAArhSB" xmi:type="uml:Stereotype">
+		<ownedAttribute association="AL3V4FmGAqAArhSB_extension" name="base_ActivityAction" xmi:id="AL3V4FmGAqAArhSB_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="AL3V4FmGAqAArhSB_from AL3V4FmGAqAArhSB_to" name="ActivityAction_ExternalCall" xmi:id="AL3V4FmGAqAArhSB_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="AL3V4FmGAqAArhSB_extension" type="AL3V4FmGAqAArhSB" xmi:id="AL3V4FmGAqAArhSB_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ServiceCall" xmi:id="XFo9.1mGAqAArgry" xmi:type="uml:Stereotype">
+		<ownedAttribute association="XFo9.1mGAqAArgry_extension" name="base_ActivityAction" xmi:id="XFo9.1mGAqAArgry_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="XFo9.1mGAqAArgry_from XFo9.1mGAqAArgry_to" name="ActivityAction_ServiceCall" xmi:id="XFo9.1mGAqAArgry_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="XFo9.1mGAqAArgry_extension" type="XFo9.1mGAqAArgry" xmi:id="XFo9.1mGAqAArgry_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Repository" xmi:id="PwfcltmGAqAArgvx" xmi:type="uml:Stereotype">
+		<ownedAttribute association="PwfcltmGAqAArgvx_extension" name="base_ActivityAction" xmi:id="PwfcltmGAqAArgvx_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="PwfcltmGAqAArgvx_from PwfcltmGAqAArgvx_to" name="ActivityAction_Repository" xmi:id="PwfcltmGAqAArgvx_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="PwfcltmGAqAArgvx_extension" type="PwfcltmGAqAArgvx" xmi:id="PwfcltmGAqAArgvx_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Security" xmi:id="f0vo8dmGAqAArgnK" xmi:type="uml:Stereotype">
+		<ownedAttribute association="f0vo8dmGAqAArgnK_extension" name="base_ActivityAction" xmi:id="f0vo8dmGAqAArgnK_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="f0vo8dmGAqAArgnK_from f0vo8dmGAqAArgnK_to" name="ActivityAction_Security" xmi:id="f0vo8dmGAqAArgnK_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="f0vo8dmGAqAArgnK_extension" type="f0vo8dmGAqAArgnK" xmi:id="f0vo8dmGAqAArgnK_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Mapper" xmi:id="utFY8dmGAqAArgpw" xmi:type="uml:Stereotype">
+		<ownedAttribute association="utFY8dmGAqAArgpw_extension" name="base_ActivityAction" xmi:id="utFY8dmGAqAArgpw_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="utFY8dmGAqAArgpw_from utFY8dmGAqAArgpw_to" name="ActivityAction_Mapper" xmi:id="utFY8dmGAqAArgpw_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="utFY8dmGAqAArgpw_extension" type="utFY8dmGAqAArgpw" xmi:id="utFY8dmGAqAArgpw_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Utility" xmi:id="5Is48dmGAqAArgrN" xmi:type="uml:Stereotype">
+		<ownedAttribute association="5Is48dmGAqAArgrN_extension" name="base_ActivityAction" xmi:id="5Is48dmGAqAArgrN_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="5Is48dmGAqAArgrN_from 5Is48dmGAqAArgrN_to" name="ActivityAction_Utility" xmi:id="5Is48dmGAqAArgrN_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="5Is48dmGAqAArgrN_extension" type="5Is48dmGAqAArgrN" xmi:id="5Is48dmGAqAArgrN_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Filter" xmi:id="m2qE8dmGAqAArgtL" xmi:type="uml:Stereotype">
+		<ownedAttribute association="m2qE8dmGAqAArgtL_extension" name="base_ActivityAction" xmi:id="m2qE8dmGAqAArgtL_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="m2qE8dmGAqAArgtL_from m2qE8dmGAqAArgtL_to" name="ActivityAction_Filter" xmi:id="m2qE8dmGAqAArgtL_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="m2qE8dmGAqAArgtL_extension" type="m2qE8dmGAqAArgtL" xmi:id="m2qE8dmGAqAArgtL_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Publisher" xmi:id="fVu08dmGAqAArg0U" xmi:type="uml:Stereotype">
+		<ownedAttribute association="fVu08dmGAqAArg0U_extension" name="base_ActivityAction" xmi:id="fVu08dmGAqAArg0U_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="fVu08dmGAqAArg0U_from fVu08dmGAqAArg0U_to" name="ActivityAction_Publisher" xmi:id="fVu08dmGAqAArg0U_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="fVu08dmGAqAArg0U_extension" type="fVu08dmGAqAArg0U" xmi:id="fVu08dmGAqAArg0U_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Cache" xmi:id="LFMpxTmGAqAKCRFz" xmi:type="uml:Stereotype">
+		<ownedAttribute association="LFMpxTmGAqAKCRFz_extension" name="base_ActivityAction" xmi:id="LFMpxTmGAqAKCRFz_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#ActivityAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="LFMpxTmGAqAKCRFz_from LFMpxTmGAqAKCRFz_to" name="ActivityAction_Cache" xmi:id="LFMpxTmGAqAKCRFz_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="LFMpxTmGAqAKCRFz_extension" type="LFMpxTmGAqAKCRFz" xmi:id="LFMpxTmGAqAKCRFz_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="BusinessRule" xmi:id=".1lV4FmGAqAArhRi" xmi:type="uml:Stereotype">
+		<ownedAttribute association=".1lV4FmGAqAArhRi_extension" name="base_CallBehaviorAction" xmi:id=".1lV4FmGAqAArhRi_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd=".1lV4FmGAqAArhRi_from .1lV4FmGAqAArhRi_to" name="ActivityAction_BusinessRule" xmi:id=".1lV4FmGAqAArhRi_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association=".1lV4FmGAqAArhRi_extension" type=".1lV4FmGAqAArhRi" xmi:id=".1lV4FmGAqAArhRi_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="RestEndpoint" xmi:id="zNUl4FmGAqAArhJB" xmi:type="uml:Stereotype">
+		<ownedAttribute association="zNUl4FmGAqAArhJB_extension" name="base_CallBehaviorAction" xmi:id="zNUl4FmGAqAArhJB_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="zNUl4FmGAqAArhJB_from zNUl4FmGAqAArhJB_to" name="ActivityAction_RestEndpoint" xmi:id="zNUl4FmGAqAArhJB_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="zNUl4FmGAqAArhJB_extension" type="zNUl4FmGAqAArhJB" xmi:id="zNUl4FmGAqAArhJB_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Validation" xmi:id="BkpV4FmGAqAArhRb" xmi:type="uml:Stereotype">
+		<ownedAttribute association="BkpV4FmGAqAArhRb_extension" name="base_CallBehaviorAction" xmi:id="BkpV4FmGAqAArhRb_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="BkpV4FmGAqAArhRb_from BkpV4FmGAqAArhRb_to" name="ActivityAction_Validation" xmi:id="BkpV4FmGAqAArhRb_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="BkpV4FmGAqAArhRb_extension" type="BkpV4FmGAqAArhRb" xmi:id="BkpV4FmGAqAArhRb_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ExternalCall" xmi:id="AL3V4FmGAqAArhSB" xmi:type="uml:Stereotype">
+		<ownedAttribute association="AL3V4FmGAqAArhSB_extension" name="base_CallBehaviorAction" xmi:id="AL3V4FmGAqAArhSB_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="AL3V4FmGAqAArhSB_from AL3V4FmGAqAArhSB_to" name="ActivityAction_ExternalCall" xmi:id="AL3V4FmGAqAArhSB_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="AL3V4FmGAqAArhSB_extension" type="AL3V4FmGAqAArhSB" xmi:id="AL3V4FmGAqAArhSB_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ErrorHandler" xmi:id="9PtV4FmGAqAArhRt" xmi:type="uml:Stereotype">
+		<ownedAttribute association="9PtV4FmGAqAArhRt_extension" name="base_CallBehaviorAction" xmi:id="9PtV4FmGAqAArhRt_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="9PtV4FmGAqAArhRt_from 9PtV4FmGAqAArhRt_to" name="ActivityAction_ErrorHandler" xmi:id="9PtV4FmGAqAArhRt_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="9PtV4FmGAqAArhRt_extension" type="9PtV4FmGAqAArhRt" xmi:id="9PtV4FmGAqAArhRt_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="SystemAction" xmi:id="YmLV4FmGAqAArhR2" xmi:type="uml:Stereotype">
+		<ownedAttribute association="YmLV4FmGAqAArhR2_extension" name="base_CallBehaviorAction" xmi:id="YmLV4FmGAqAArhR2_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="YmLV4FmGAqAArhR2_from YmLV4FmGAqAArhR2_to" name="ActivityAction_SystemAction" xmi:id="YmLV4FmGAqAArhR2_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="YmLV4FmGAqAArhR2_extension" type="YmLV4FmGAqAArhR2" xmi:id="YmLV4FmGAqAArhR2_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="ServiceCall" xmi:id="XFo9.1mGAqAArgry" xmi:type="uml:Stereotype">
+		<ownedAttribute association="XFo9.1mGAqAArgry_extension" name="base_CallBehaviorAction" xmi:id="XFo9.1mGAqAArgry_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="XFo9.1mGAqAArgry_from XFo9.1mGAqAArgry_to" name="ActivityAction_ServiceCall" xmi:id="XFo9.1mGAqAArgry_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="XFo9.1mGAqAArgry_extension" type="XFo9.1mGAqAArgry" xmi:id="XFo9.1mGAqAArgry_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Repository" xmi:id="PwfcltmGAqAArgvx" xmi:type="uml:Stereotype">
+		<ownedAttribute association="PwfcltmGAqAArgvx_extension" name="base_CallBehaviorAction" xmi:id="PwfcltmGAqAArgvx_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="PwfcltmGAqAArgvx_from PwfcltmGAqAArgvx_to" name="ActivityAction_Repository" xmi:id="PwfcltmGAqAArgvx_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="PwfcltmGAqAArgvx_extension" type="PwfcltmGAqAArgvx" xmi:id="PwfcltmGAqAArgvx_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Security" xmi:id="f0vo8dmGAqAArgnK" xmi:type="uml:Stereotype">
+		<ownedAttribute association="f0vo8dmGAqAArgnK_extension" name="base_CallBehaviorAction" xmi:id="f0vo8dmGAqAArgnK_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="f0vo8dmGAqAArgnK_from f0vo8dmGAqAArgnK_to" name="ActivityAction_Security" xmi:id="f0vo8dmGAqAArgnK_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="f0vo8dmGAqAArgnK_extension" type="f0vo8dmGAqAArgnK" xmi:id="f0vo8dmGAqAArgnK_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Mapper" xmi:id="utFY8dmGAqAArgpw" xmi:type="uml:Stereotype">
+		<ownedAttribute association="utFY8dmGAqAArgpw_extension" name="base_CallBehaviorAction" xmi:id="utFY8dmGAqAArgpw_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="utFY8dmGAqAArgpw_from utFY8dmGAqAArgpw_to" name="ActivityAction_Mapper" xmi:id="utFY8dmGAqAArgpw_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="utFY8dmGAqAArgpw_extension" type="utFY8dmGAqAArgpw" xmi:id="utFY8dmGAqAArgpw_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Utility" xmi:id="5Is48dmGAqAArgrN" xmi:type="uml:Stereotype">
+		<ownedAttribute association="5Is48dmGAqAArgrN_extension" name="base_CallBehaviorAction" xmi:id="5Is48dmGAqAArgrN_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="5Is48dmGAqAArgrN_from 5Is48dmGAqAArgrN_to" name="ActivityAction_Utility" xmi:id="5Is48dmGAqAArgrN_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="5Is48dmGAqAArgrN_extension" type="5Is48dmGAqAArgrN" xmi:id="5Is48dmGAqAArgrN_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Filter" xmi:id="m2qE8dmGAqAArgtL" xmi:type="uml:Stereotype">
+		<ownedAttribute association="m2qE8dmGAqAArgtL_extension" name="base_CallBehaviorAction" xmi:id="m2qE8dmGAqAArgtL_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="m2qE8dmGAqAArgtL_from m2qE8dmGAqAArgtL_to" name="ActivityAction_Filter" xmi:id="m2qE8dmGAqAArgtL_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="m2qE8dmGAqAArgtL_extension" type="m2qE8dmGAqAArgtL" xmi:id="m2qE8dmGAqAArgtL_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Publisher" xmi:id="fVu08dmGAqAArg0U" xmi:type="uml:Stereotype">
+		<ownedAttribute association="fVu08dmGAqAArg0U_extension" name="base_CallBehaviorAction" xmi:id="fVu08dmGAqAArg0U_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="fVu08dmGAqAArg0U_from fVu08dmGAqAArg0U_to" name="ActivityAction_Publisher" xmi:id="fVu08dmGAqAArg0U_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="fVu08dmGAqAArg0U_extension" type="fVu08dmGAqAArg0U" xmi:id="fVu08dmGAqAArg0U_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+	<packagedElement name="Cache" xmi:id="LFMpxTmGAqAKCRFz" xmi:type="uml:Stereotype">
+		<ownedAttribute association="LFMpxTmGAqAKCRFz_extension" name="base_CallBehaviorAction" xmi:id="LFMpxTmGAqAKCRFz_to">
+			<type href="pathmap://UML_METAMODELS/UML.metamodel.uml#CallBehaviorAction" xmi:type="uml:Class"/>
+		</ownedAttribute>
+	</packagedElement>
+	<packagedElement memberEnd="LFMpxTmGAqAKCRFz_from LFMpxTmGAqAKCRFz_to" name="ActivityAction_Cache" xmi:id="LFMpxTmGAqAKCRFz_extension" xmi:type="uml:Extension">
+		<ownedEnd aggregation="composite" association="LFMpxTmGAqAKCRFz_extension" type="LFMpxTmGAqAKCRFz" xmi:id="LFMpxTmGAqAKCRFz_from" xmi:type="uml:ExtensionEnd"/>
+	</packagedElement>
+</uml:Profile>

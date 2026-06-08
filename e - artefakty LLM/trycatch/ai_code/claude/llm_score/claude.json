@@ -1,0 +1,113 @@
+{
+  "structural": {
+    "score": 0.893,
+    "breakdown": {
+      "actions_coverage": 1.0,
+      "decisions_coverage": 1.0,
+      "branches_coverage": 0.5,
+      "loop_coverage": 1.0,
+      "parallel_coverage": 1.0,
+      "termination_coverage": 1.0,
+      "no_extra_behavior": 1.0
+    },
+    "issues": [
+      {
+        "criterion": "S3",
+        "score": 0.5,
+        "finding": "The 'exception' branch of Decision(isTimeout) only catches TimeoutException. The spec defines DisposableEmailDetected as routed before the Decision node, but CheckEmailUniqueness also raises TimeoutException outside the Decision block — its timeout is handled via an early return (504) rather than routing through HandleRegistrationTimeout and FlowJoinRegistration. This means the 'exception' branch of the Decision is partially bypassed for CheckEmailUniqueness timeouts, producing a different termination path than the spec implies.",
+        "severity": "minor"
+      }
+    ]
+  },
+  "semantic": {
+    "score": 0.78,
+    "issues": [
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "CheckEmailUniqueness raises TimeoutException, which per the spec should route through Decision(isTimeout) → HandleRegistrationTimeout → FlowJoinRegistration and return 504 via the join. Instead the controller short-circuits with a direct 'return JSONResponse(status_code=504)' before the Decision block, bypassing HandleRegistrationTimeout entirely. This means the postCondition 'registrationStatus_Failed' is never set and the audit/log path in the error handler is skipped for this case."
+      },
+      {
+        "aspect": "exceptions",
+        "severity": "minor",
+        "description": "SendActivationEmail retry policy specifies retryOn: ['Timeout', '502', '503']. The implementation only catches TimeoutException in with_retry. HTTP status codes 502 and 503 are noted as mapping to TimeoutException 'in this context' but no actual mapping or wrapping logic exists — if the real external HTTP call returns 502/503, those would not be caught by retry_on=(TimeoutException,). This is an incomplete retry implementation."
+      },
+      {
+        "aspect": "transactions",
+        "severity": "minor",
+        "description": "Both CreateUserAccount and FinalizeRegistration are marked transactional=true with consistencyScope=local-transaction. The implementation uses comments ('BEGIN local-transaction', 'COMMIT') and a bare try/except/raise pattern, but no actual transaction context manager or unit-of-work is wired. While acceptable for a simulation, the semantic is not enforced — a real exception other than TimeoutException inside CreateUserAccount (e.g., a DB constraint violation) would re-raise without rollback coordination."
+      },
+      {
+        "aspect": "data_flow",
+        "severity": "minor",
+        "description": "FilterDisposableEmailDomains output 'emailAllowed' (bool) is set to ctx.email_allowed. However the Decision branch label is 'okfilterdisposableemaildomains', implying the decision is on whether the filter passed (no exception), not on reading the emailAllowed flag value. The implementation correctly uses exception-based branching, but ctx.email_allowed is set to True on the happy path and never subsequently read — it is a dangling context output."
+      },
+      {
+        "aspect": "http_contract",
+        "severity": "minor",
+        "description": "The spec defines responseError=400 for DisposableEmailDetected. The implementation returns 400 for this case, which is correct. However, CheckEmailUniqueness timeout returns 504 via direct early return rather than through FlowJoinRegistration, so the 504 response shape (error_code, message, timestamp fields from ErrorResponse) differs from the timeout path that goes through HandleRegistrationTimeout — the early-return 504 only contains an 'error' string key."
+      },
+      {
+        "aspect": "security",
+        "severity": "minor",
+        "description": "FilterDisposableEmailDomains has auditRequired=true. The audit is correctly logged on the BLOCKED path. However no audit entry is written on the ALLOWED path (email_allowed=True). Depending on interpretation, auditRequired may require logging both outcomes for a complete audit trail."
+      }
+    ],
+    "reasoning": "The implementation covers the full happy path correctly and the primary Decision(isTimeout) block accurately models the BackToDecision control flow as a single try/except wrapping CreateUserAccount, SendActivationEmail, and FinalizeRegistration. FlowJoinRegistration correctly merges both the success and timeout error paths into a single response shaper. The main semantic gap is that CheckEmailUniqueness TimeoutException is handled before the Decision block, bypassing HandleRegistrationTimeout and its postCondition. The retry policy for SendActivationEmail is structurally present but semantically incomplete for 502/503. Transactional boundaries are acknowledged but not enforced. These are moderate deviations that would not break the happy path but would produce incorrect behavior under timeout/failure conditions for CheckEmailUniqueness."
+  },
+  "specification": {
+    "score": 0.625,
+    "breakdown": {
+      "actions_completeness": 0.5,
+      "inputs_outputs_clarity": 0.5,
+      "state_definitions": 0.5,
+      "action_semantics": 1.0,
+      "transaction_consistency": 1.0,
+      "exception_handling": 0.5,
+      "decision_conditions": 0.0,
+      "termination_definitions": 1.0
+    },
+    "defects": [
+      {
+        "criterion": "decision_conditions",
+        "score": 0.0,
+        "defectType": "ambiguous",
+        "location": "Decision(isTimeout)",
+        "description": "The Decision node is named 'isTimeout' but its branches are labeled 'okfilterdisposableemaildomains', 'okcreateuseraccount', 'oksendactivationemail', and 'exception'. The name suggests a boolean timeout check, but the branches represent sequential post-action success states spanning three different actions. A single Decision node cannot structurally represent three sequential conditional branches without being a loop or nested decisions. This ambiguity is what forces the generator to interpret BackToDecision as a flat try/except — which loses the per-action branching semantics.",
+        "suggestedFix": "Either rename the Decision to reflect its true role (e.g., 'Decision(registrationPhase)') and document that BackToDecision models exception routing back to a shared handler, or decompose into three separate Decision nodes — one per action — each with an 'ok' branch and an 'exception' branch routing to HandleRegistrationTimeout."
+      },
+      {
+        "criterion": "exception_handling",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness()",
+        "description": "CheckEmailUniqueness declares TimeoutException in its exceptions list, but there is no BackToDecision(isTimeout) annotation after it. All other timeout-raising actions (CreateUserAccount, SendActivationEmail) have explicit BackToDecision entries. This omission makes it ambiguous whether CheckEmailUniqueness timeout should route through Decision(isTimeout) → HandleRegistrationTimeout or be handled as a direct early error return. The generated code chose the latter, which may be incorrect.",
+        "suggestedFix": "Add 'BackToDecision(isTimeout)(okcheckemailuniqueness)' after CheckEmailUniqueness, or explicitly annotate that its TimeoutException should be handled locally (e.g., add an 'earlyExit: true' flag or a separate error path annotation)."
+      },
+      {
+        "criterion": "inputs_outputs_clarity",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "CheckEmailUniqueness()",
+        "description": "CheckEmailUniqueness has no 'outputs' field defined in its metadata. While it is a read-only uniqueness check and may produce no context output, the absence of an explicit output (even 'emailUnique: bool') makes the data flow opaque and forces the generator to infer that success is implicit (no exception = email is unique).",
+        "suggestedFix": "Add an output such as {\"name\": \"emailUnique\", \"type\": \"bool\", \"target\": \"context\"} to make the successful outcome explicit in the data flow."
+      },
+      {
+        "criterion": "actions_completeness",
+        "score": 0.5,
+        "defectType": "missing",
+        "location": "SendActivationEmail() retryPolicy.retryOn",
+        "description": "retryOn lists [\"Timeout\", \"502\", \"503\"] mixing an exception class name with HTTP status codes. There is no specification of how HTTP status codes map to exceptions in this system. A generator cannot unambiguously implement retry_on for 502/503 without knowing the exception type thrown when those codes are received from the external service.",
+        "suggestedFix": "Either normalize retryOn to exception types only (e.g., [\"TimeoutException\", \"BadGatewayException\", \"ServiceUnavailableException\"]) or add a mapping table in the spec indicating which HTTP status codes correspond to which exception classes."
+      },
+      {
+        "criterion": "state_definitions",
+        "score": 0.5,
+        "defectType": "incomplete",
+        "location": "HandleRegistrationTimeout() postCondition: registrationStatus_Failed",
+        "description": "The postCondition 'registrationStatus_Failed' is stated but there is no corresponding state transition defined for the case where userId is null (timeout before CreateUserAccount). The spec notes 'userId may not be available' but does not specify what the failure state means when no user record exists — should a failed-registration audit record still be written? Should a tombstone record be created?",
+        "suggestedFix": "Add conditional postCondition semantics: 'IF userId IS NOT NULL THEN UPDATE user.status=FAILED ELSE log audit record with email only'. Alternatively, introduce a separate RegistrationAttemptLog entity to record failed attempts regardless of whether a user record was created."
+      }
+    ]
+  }
+}

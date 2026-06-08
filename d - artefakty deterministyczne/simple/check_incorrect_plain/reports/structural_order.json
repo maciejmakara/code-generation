@@ -1,0 +1,22 @@
+{
+  "violations": [
+    {
+      "function": "main_Cancelsubscription",
+      "from": "RejectCancellation",
+      "to": "FlowJoinCancelSubscription",
+      "from_lines": [
+        14
+      ],
+      "to_lines": [
+        12
+      ]
+    }
+  ],
+  "skipped_edges": [],
+  "summary": {
+    "total_edges": 11,
+    "checked_edges": 11,
+    "violations_count": 1,
+    "skipped_edges_count": 0
+  }
+}

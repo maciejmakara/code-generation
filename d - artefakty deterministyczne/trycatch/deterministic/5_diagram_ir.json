@@ -1,0 +1,195 @@
+{
+  "activity": "User registration",
+  "nodes": [
+    {
+      "id": "SUoUltmGAqAArgfU",
+      "action": "SUoUltmGAqAArgfU",
+      "type": "uml:InitialNode",
+      "semanticType": "uml:InitialNode",
+      "stereotype": null,
+      "comment": "endpoint = POST /users/register responseSuccess = 201 Created responseError = 400|409|422|504",
+      "in": 0,
+      "out": 1
+    },
+    {
+      "id": "6ZAsltmGAqAArgkG",
+      "action": "6ZAsltmGAqAArgkG",
+      "type": "uml:ActivityFinalNode",
+      "semanticType": "uml:ActivityFinalNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 1,
+      "out": 0
+    },
+    {
+      "id": "j_DUltmGAqAArggw",
+      "action": "CheckEmailUniqueness",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Verify email address is not already registered. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \nexceptions = [\"TimeoutException\", \"ConflictException\"] \nsideEffects = false \nidempotent = true \nconsistencyScope = none",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "pD_UltmGAqAArghY",
+      "action": "CreateUserAccount",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Persist new user account with hashed credentials. \ninputs = [ {\"name\": \"validatedUserData\", \n\"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"target\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nsideEffects = true \nidempotent = false \nconsistencyScope = local-transaction \ntransactional = true \nauditRequired = true \nllmPriority = high",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "dr1LgLmGAqAAux9d",
+      "action": "FilterDisposableEmailDomains",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Filter",
+      "comment": "desc = Reject registrations from known disposable or temporary email domains using a maintained blocklist. \ninputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailAllowed\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"DisposableEmailDetected\"] \nauditRequired = true \nllmPriority = high",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "ZKhMltmGAqAArgjg",
+      "action": "FinalizeRegistration",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Repository",
+      "comment": "desc = Mark registration as complete and set user status active. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"requestId\", \"type\": \"UUID\", \"target\": \"response\"} ] \npostCondition = userStatus_Active \nsideEffects = true \nidempotent = true \nconsistencyScope = local-transaction \ntransactional = true",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "TdXMltmGAqAArgju",
+      "action": "FlowJoinRegistration",
+      "type": "uml:MergeNode",
+      "semanticType": "uml:MergeNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 2,
+      "out": 1
+    },
+    {
+      "id": "ZWE0ltmGAqAArghm",
+      "action": "HandleRegistrationTimeout",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ErrorHandler",
+      "comment": "desc = Handle timeout – log failure and return error response. \nCalled regardless of which action triggered timeout, userId may not be available. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID?\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"errorResponse\", \"type\": \"ErrorResponse\", \"target\": \"response\"} ] \npostCondition = registrationStatus_Failed",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "fCUMltmGAqAArgjA",
+      "action": "SendActivationEmail",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "ExternalCall",
+      "comment": "desc = Send activation email with confirmation link. \ninputs = [ {\"name\": \"userId\", \"type\": \"UUID\", \"source\": \"context\"}, \n{\"name\": \"email\", \"type\": \"String\", \"source\": \"context\"} ] \noutputs = [ {\"name\": \"emailSentStatus\", \"type\": \"bool\", \"target\": \"context\"} ] \nexceptions = [\"TimeoutException\"] \nretryPolicy = {\"maxAttempts\": 3, \"backoffMs\": 300, \"retryOn\": [\"Timeout\", \"502\", \"503\"], \n\"onRetryExhausted\": \"raise\"}",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "kTYUltmGAqAArgfd",
+      "action": "ValidateUserInput",
+      "type": "uml:CallBehaviorAction",
+      "semanticType": "uml:CallBehaviorAction",
+      "stereotype": "Validation",
+      "comment": "desc = Validate registration DTO structure and required fields. \ninputs = [ {\"name\": \"registrationDTO\", \"type\": \"RegistrationDTO\", \"source\": \"request\"} ] \noutputs = [ {\"name\": \"validatedUserData\", \"type\": \"ValidatedUserData\", \"target\": \"context\"} ] \nexceptions = [\"ValidationException\"]",
+      "in": 1,
+      "out": 1
+    },
+    {
+      "id": "6RnUltmGAqAArghC",
+      "action": "isTimeout",
+      "type": "uml:DecisionNode",
+      "semanticType": "uml:MergeDecisionNode",
+      "stereotype": null,
+      "comment": "",
+      "in": 3,
+      "out": 4
+    }
+  ],
+  "edges": [
+    {
+      "from": "SUoUltmGAqAArgfU",
+      "to": "ValidateUserInput",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "ValidateUserInput",
+      "to": "CheckEmailUniqueness",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "CheckEmailUniqueness",
+      "to": "FilterDisposableEmailDomains",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "isTimeout",
+      "to": "CreateUserAccount",
+      "condition": "okFilterDisposableEmailDomains",
+      "kind": "next"
+    },
+    {
+      "from": "isTimeout",
+      "to": "HandleRegistrationTimeout",
+      "condition": "exception",
+      "kind": "next"
+    },
+    {
+      "from": "isTimeout",
+      "to": "SendActivationEmail",
+      "condition": "okCreateUserAccount",
+      "kind": "next"
+    },
+    {
+      "from": "isTimeout",
+      "to": "FinalizeRegistration",
+      "condition": "okSendActivationEmail",
+      "kind": "next"
+    },
+    {
+      "from": "CreateUserAccount",
+      "to": "isTimeout",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "HandleRegistrationTimeout",
+      "to": "FlowJoinRegistration",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "SendActivationEmail",
+      "to": "isTimeout",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FinalizeRegistration",
+      "to": "FlowJoinRegistration",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FlowJoinRegistration",
+      "to": "6ZAsltmGAqAArgkG",
+      "condition": null,
+      "kind": "next"
+    },
+    {
+      "from": "FilterDisposableEmailDomains",
+      "to": "isTimeout",
+      "condition": null,
+      "kind": "next"
+    }
+  ]
+}

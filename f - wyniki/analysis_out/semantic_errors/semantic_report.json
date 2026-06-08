@@ -1,0 +1,380 @@
+{
+  "rows": [
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "model": "Gpt",
+      "score": 0.5,
+      "rationale": "Model wykryl problem ale zastosowal ukryta synchronizacje. Nie stosujac sie do semantyki fork'a.",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "1",
+      "model": "Claude",
+      "score": 0.0,
+      "rationale": "Model zauwazyl problem, ale zignorowal transactions calkowicie.",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "model": "Gpt",
+      "score": 0.5,
+      "rationale": "Model nie anuluje pozostalych sciezek,, fail fast z a wyciekiem zadan",
+      "has_good_spec": true,
+      "good_spec_note": "W tym przypadku nawet na podstawie dobrej specyfikacji kod jest w pelni niepoprawny, specyfikacja jest za slaba",
+      "included_in_filtered": false,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "fork",
+      "file_id": "2",
+      "model": "Claude",
+      "score": 0.5,
+      "rationale": "Model nie anuluje pozostalych sciezek,, fail fast z a wyciekiem zadan",
+      "has_good_spec": true,
+      "good_spec_note": "W tym przypadku nawet na podstawie dobrej specyfikacji kod jest w pelni niepoprawny, specyfikacja jest za slaba",
+      "included_in_filtered": false,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\fork\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "model": "Gpt",
+      "score": 1.0,
+      "rationale": "Model rozwiazuje blad w sposob poprawny",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "1",
+      "model": "Claude",
+      "score": 1.0,
+      "rationale": "Model rozwiazuje blad w sposob poprawny",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "model": "Gpt",
+      "score": 0.0,
+      "rationale": "Model rzuca wyjatek i przerywa calosc",
+      "has_good_spec": true,
+      "good_spec_note": "W tym przypadku nawet na podstawie dobrej specyfikacji kod jest niepoprawny, specyfikacja jest za slaba",
+      "included_in_filtered": false,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "loop",
+      "file_id": "2",
+      "model": "Claude",
+      "score": 0.0,
+      "rationale": "Model rzuca wyjatek i przerywa calosc",
+      "has_good_spec": true,
+      "good_spec_note": "W tym przypadku nawet na podstawie dobrej specyfikacji kod jest niepoprawny, specyfikacja jest za slaba",
+      "included_in_filtered": false,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\loop\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "model": "Gpt",
+      "score": 0.0,
+      "rationale": "rzuca wyjatek, zwraca blad 422, przerywa flow",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "1",
+      "model": "Claude",
+      "score": 0.0,
+      "rationale": "Rzuca wyjatek, zwraca blad 502, przerywa flow",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "model": "Gpt",
+      "score": 0.5,
+      "rationale": "Nie zgłasza problemu, bierze z DB",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "simple",
+      "file_id": "2",
+      "model": "Claude",
+      "score": 0.5,
+      "rationale": "# Assumption: The JWT subject (after \"Bearer \") encodes customer_id.\nbierze z DB mimo wszystko, jest swiadomy ale mimo to probuje zrobic dzialajacy kod\nModel nie zgłasza braku danych w specyfikacji, lecz wprowadza własne założenia dotyczące źródła danych, co prowadzi do niejawnej zmiany kontraktu między komponentami.",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\simple\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "model": "Gpt",
+      "score": 1.0,
+      "rationale": "Kod jest poprawny",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "1",
+      "model": "Claude",
+      "score": 1.0,
+      "rationale": "Poprawnie Optional, loguje None gdy timeout przed CreateUserAccount",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\check_incorrect_semantic\\1"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "model": "Gpt",
+      "score": 0.5,
+      "rationale": "Timeout obsluzony poprawnie ale brak komentarza o sprzecznosci",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\check_incorrect_semantic\\2"
+    },
+    {
+      "scenario": "trycatch",
+      "file_id": "2",
+      "model": "Claude",
+      "score": 0.5,
+      "rationale": "Timeout obsluzony poprawnie ale brak komentarza o sprzecznosci",
+      "has_good_spec": false,
+      "good_spec_note": "",
+      "included_in_filtered": true,
+      "source_path": "C:\\git_projects\\new\\partial-automate-code-generation\\final_tests\\artrifacts\\trycatch\\check_incorrect_semantic\\2"
+    }
+  ],
+  "file_summary": [
+    {
+      "dataset": "all",
+      "scenario": "fork",
+      "file_id": "1",
+      "avg_score": 0.25,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "all",
+      "scenario": "fork",
+      "file_id": "2",
+      "avg_score": 0.5,
+      "count": 2,
+      "has_good_spec": 1
+    },
+    {
+      "dataset": "all",
+      "scenario": "loop",
+      "file_id": "1",
+      "avg_score": 1.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "all",
+      "scenario": "loop",
+      "file_id": "2",
+      "avg_score": 0.0,
+      "count": 2,
+      "has_good_spec": 1
+    },
+    {
+      "dataset": "all",
+      "scenario": "simple",
+      "file_id": "1",
+      "avg_score": 0.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "all",
+      "scenario": "simple",
+      "file_id": "2",
+      "avg_score": 0.5,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "all",
+      "scenario": "trycatch",
+      "file_id": "1",
+      "avg_score": 1.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "all",
+      "scenario": "trycatch",
+      "file_id": "2",
+      "avg_score": 0.5,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "fork",
+      "file_id": "1",
+      "avg_score": 0.25,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "loop",
+      "file_id": "1",
+      "avg_score": 1.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "simple",
+      "file_id": "1",
+      "avg_score": 0.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "simple",
+      "file_id": "2",
+      "avg_score": 0.5,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "trycatch",
+      "file_id": "1",
+      "avg_score": 1.0,
+      "count": 2,
+      "has_good_spec": 0
+    },
+    {
+      "dataset": "filtered",
+      "scenario": "trycatch",
+      "file_id": "2",
+      "avg_score": 0.5,
+      "count": 2,
+      "has_good_spec": 0
+    }
+  ],
+  "overall_summary": [
+    {
+      "dataset": "all",
+      "kind": "model",
+      "name": "Claude",
+      "avg_score": 0.4375,
+      "count": 8
+    },
+    {
+      "dataset": "all",
+      "kind": "model",
+      "name": "Gpt",
+      "avg_score": 0.5,
+      "count": 8
+    },
+    {
+      "dataset": "all",
+      "kind": "scenario",
+      "name": "fork",
+      "avg_score": 0.375,
+      "count": 4
+    },
+    {
+      "dataset": "all",
+      "kind": "scenario",
+      "name": "loop",
+      "avg_score": 0.5,
+      "count": 4
+    },
+    {
+      "dataset": "all",
+      "kind": "scenario",
+      "name": "simple",
+      "avg_score": 0.25,
+      "count": 4
+    },
+    {
+      "dataset": "all",
+      "kind": "scenario",
+      "name": "trycatch",
+      "avg_score": 0.75,
+      "count": 4
+    },
+    {
+      "dataset": "filtered",
+      "kind": "model",
+      "name": "Claude",
+      "avg_score": 0.5,
+      "count": 6
+    },
+    {
+      "dataset": "filtered",
+      "kind": "model",
+      "name": "Gpt",
+      "avg_score": 0.5833333333333334,
+      "count": 6
+    },
+    {
+      "dataset": "filtered",
+      "kind": "scenario",
+      "name": "fork",
+      "avg_score": 0.25,
+      "count": 2
+    },
+    {
+      "dataset": "filtered",
+      "kind": "scenario",
+      "name": "loop",
+      "avg_score": 1.0,
+      "count": 2
+    },
+    {
+      "dataset": "filtered",
+      "kind": "scenario",
+      "name": "simple",
+      "avg_score": 0.25,
+      "count": 4
+    },
+    {
+      "dataset": "filtered",
+      "kind": "scenario",
+      "name": "trycatch",
+      "avg_score": 0.75,
+      "count": 4
+    }
+  ]
+}

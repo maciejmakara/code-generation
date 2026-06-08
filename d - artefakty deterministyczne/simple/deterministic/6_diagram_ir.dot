@@ -1,0 +1,27 @@
+digraph Activity {
+  rankdir=TB;
+  node [shape=box, fontname=Helvetica];
+  edge [fontname=Helvetica];
+  "9D.xSdmGAqAArgoH" [label="9D.xSdmGAqAArgoH\\numl:InitialNode", shape=circle];
+  "AuthorizeCustomer" [label="AuthorizeCustomer\\numl:CallBehaviorAction", shape=box];
+  "CancelSubscription" [label="CancelSubscription\\numl:CallBehaviorAction", shape=box];
+  "CheckCancellationEligibility" [label="CheckCancellationEligibility\\numl:CallBehaviorAction", shape=box];
+  "FlowJoinCancelSubscription" [label="FlowJoinCancelSubscription\\numl:MergeNode", shape=diamond];
+  "LoadSubscription" [label="LoadSubscription\\numl:CallBehaviorAction", shape=box];
+  "PublishSubscriptionCanceled" [label="PublishSubscriptionCanceled\\numl:CallBehaviorAction", shape=box];
+  "RejectCancellation" [label="RejectCancellation\\numl:CallBehaviorAction", shape=box];
+  "SendCancellationEmail" [label="SendCancellationEmail\\numl:CallBehaviorAction", shape=box];
+  "cancellable?" [label="cancellable?\\numl:DecisionNode", shape=diamond];
+  "q3rJSdmGAqAArgqw" [label="q3rJSdmGAqAArgqw\\numl:ActivityFinalNode", shape=doublecircle];
+  "9D.xSdmGAqAArgoH" -> "AuthorizeCustomer";
+  "AuthorizeCustomer" -> "LoadSubscription";
+  "LoadSubscription" -> "CheckCancellationEligibility";
+  "CheckCancellationEligibility" -> "cancellable?";
+  "cancellable?" -> "CancelSubscription" [label="yes"]; 
+  "cancellable?" -> "RejectCancellation" [label="no"]; 
+  "CancelSubscription" -> "PublishSubscriptionCanceled";
+  "RejectCancellation" -> "FlowJoinCancelSubscription";
+  "PublishSubscriptionCanceled" -> "SendCancellationEmail";
+  "SendCancellationEmail" -> "FlowJoinCancelSubscription";
+  "FlowJoinCancelSubscription" -> "q3rJSdmGAqAArgqw";
+}

@@ -1,0 +1,9 @@
+scenario,view,passed,failed,total,pass_rate
+fork,normal,11,0,11,1.0
+fork,strict_final,11,0,11,1.0
+loop,normal,7,1,8,0.875
+loop,strict_final,7,1,8,0.875
+simple,normal,8,0,8,1.0
+simple,strict_final,8,0,8,1.0
+trycatch,normal,7,0,7,1.0
+trycatch,strict_final,5,2,7,0.7142857142857143

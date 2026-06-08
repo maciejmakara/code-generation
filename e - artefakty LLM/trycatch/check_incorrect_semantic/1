@@ -1,0 +1,5 @@
+GPT - 1
+Kod jest poprawny
+
+Claude - 1
+Poprawnie Optional, loguje None gdy timeout przed CreateUserAccount

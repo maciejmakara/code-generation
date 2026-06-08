@@ -1,0 +1,2 @@
+$ C:\git_projects\new\partial-automate-code-generation\diagram-parser\venv\Scripts\python.exe diagram-parser/static_validator\validate_schema_jsons.py --type 5 --file diagram-parser\files\activity_parsed\5_diagram_ir.json
+INVALID: JSON Schema validation failed: '1' is not of type 'integer' (path: nodes -> 1 -> in)

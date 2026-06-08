@@ -1,0 +1,10 @@
+generator,evaluator,mean_score,is_self_evaluation,categories_used
+claude,claude,0.825875,True,structural+semantic
+claude,gpt,0.9087500000000001,False,structural+semantic
+claude,swe,0.94125,False,structural+semantic
+gpt,claude,0.8748750000000001,False,structural+semantic
+gpt,gpt,0.9237500000000001,True,structural+semantic
+gpt,swe,0.9125000000000001,False,structural+semantic
+swe,claude,0.7617499999999999,False,structural+semantic
+swe,gpt,0.86875,False,structural+semantic
+swe,swe,0.89375,True,structural+semantic
